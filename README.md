@@ -30,7 +30,7 @@ de texto, con CLI, TUI y catálogo de herramientas.
 # Void Linux
 sudo xbps-install -S python3 git
 
-git clone <tu-repositorio> osintkit
+git clone https://github.com/HormanBYAS/osintkit.git
 cd osintkit
 
 # Opción 1: ejecutar sin instalar

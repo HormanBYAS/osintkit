@@ -30,7 +30,9 @@ osintkit = "osintkit.cli:main"
 osintol = "osintkit.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/osintkit/osintkit"
+Homepage = "https://github.com/HormanBYAS/osintkit"
+Repository = "https://github.com/HormanBYAS/osintkit"
+Issues = "https://github.com/HormanBYAS/osintkit/issues"
 
 [tool.setuptools]
 packages = ["osintkit", "osintkit.modules"]
