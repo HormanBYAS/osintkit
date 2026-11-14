@@ -30,7 +30,7 @@ CATEGORIES: dict[str, tuple[str, str]] = {
     "dns": ("DNS y dominios", "Registros, subdominios, certificados y WHOIS"),
     "web": ("Web y superficie", "HTTP, TLS, tecnologías, rutas y archivado"),
     "ip": ("IP y red", "Geolocalización, ASN, reputación y puertos"),
-    "email": ("Email", "Validación, perfiles, brechas y PGP"),
+    "email": ("Email", "Validación, perfiles, brechas, PGP y 2.000+ sitios"),
     "username": ("Usuarios y redes", "Presencia de un alias en múltiples plataformas"),
     "phone": ("Teléfono", "País, formato, reputación y perfiles directos"),
     "crypto": ("Criptomonedas", "Direcciones BTC/ETH y actividad on-chain"),
@@ -1300,6 +1300,16 @@ TOOLS: list[Tool] = [
         "Busca el email y devuelve enlaces directos a perfiles y menciones.",
         module="email_dork",
         tags=("gratis", "sin clave", "perfiles", "búsqueda web"),
+    ),
+    _tool(
+        "email_mass",
+        "Búsqueda masiva de email",
+        "email",
+        ("email",),
+        "Comprueba la parte local del email en más de 2.600 sitios (Maigret, MIT).",
+        module="email_mass",
+        tags=("gratis", "sin clave", "pasivo", "masivo", "gmail", "2k+"),
+        timeout=600,
     ),
     _tool(
         "holehe",
@@ -2610,7 +2620,16 @@ PROFILES: dict[str, dict[str, object]] = {
     "email": {
         "name": "Email · pasivo",
         "kinds": ("email",),
-        "description": "Validación, Gravatar, PGP, brechas y perfiles directos.",
+        "description": "Validación, perfiles, brechas y 2.617 sitios para la parte local.",
+        "tools": [
+            "email_validate", "email_gravatar", "email_pgp", "email_hibp",
+            "email_hunter", "emailrep", "email_dork", "email_mass",
+        ],
+    },
+    "email-quick": {
+        "name": "Email · rápido",
+        "kinds": ("email",),
+        "description": "Solo validación y perfiles directos; no ejecuta la base masiva.",
         "tools": [
             "email_validate", "email_gravatar", "email_pgp", "email_hibp",
             "email_hunter", "emailrep", "email_dork",
@@ -2619,8 +2638,11 @@ PROFILES: dict[str, dict[str, object]] = {
     "email-deep": {
         "name": "Email · profundo",
         "kinds": ("email",),
-        "description": "Herramientas externas de registro y filtraciones.",
-        "tools": ["holehe", "ghunt", "h8mail", "mosint", "blackbird", "pwnedornot", "infoga"],
+        "description": "2.617 sitios y herramientas externas de registro y filtraciones.",
+        "tools": [
+            "email_mass", "holehe", "ghunt", "h8mail", "mosint", "blackbird",
+            "pwnedornot", "infoga",
+        ],
     },
     "username": {
         "name": "Usuario · pasivo",
@@ -2764,6 +2786,7 @@ PROFILE_ALIASES = {
     "deep": "domain-deep",
     "profundo": "domain-deep",
     "correo": "email",
+    "gmail": "email",
     "usuario": "username",
     "telefono": "phone",
     "teléfono": "phone",

@@ -2,7 +2,8 @@
 
 osintkit incluye datos derivados de proyectos de código abierto. Los datos se
 distribuyen con sus licencias originales y se usan únicamente para enumerar
-perfiles públicos.
+perfiles públicos. La base de sitios de usuario se emplea tanto para alias como
+para la parte local de un email o Gmail.
 
 ## Maigret
 

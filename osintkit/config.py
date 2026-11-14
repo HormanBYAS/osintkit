@@ -10,7 +10,7 @@ from typing import Any
 from .util import atomic_write, ensure_dir, mask_secret
 
 APP_NAME = "osintkit"
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 CONFIG_VERSION = 1
 
 DEFAULT_SETTINGS: dict[str, Any] = {
@@ -23,6 +23,9 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     "username_mass_limit": 0,
     "username_mass_workers": 40,
     "username_mass_timeout": 6.0,
+    "email_mass_limit": 0,
+    "email_mass_workers": 40,
+    "email_mass_timeout": 6.0,
     "report_dir": "",
     "user_agent": (
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "

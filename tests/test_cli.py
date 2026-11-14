@@ -24,7 +24,7 @@ class CliTests(unittest.TestCase):
     def test_version(self) -> None:
         code, out, _ = self.run_cli("version")
         self.assertEqual(code, 0)
-        self.assertIn("osintkit 1.1.0", out)
+        self.assertIn("osintkit 1.2.0", out)
         self.assertIn("Módulos internos", out)
 
     def test_osintol_launcher(self) -> None:
@@ -38,7 +38,7 @@ class CliTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(proc.returncode, 0)
-        self.assertIn("osintkit 1.1.0", proc.stdout)
+        self.assertIn("osintkit 1.2.0", proc.stdout)
         self.assertIn("Módulos internos", proc.stdout)
 
     def test_list_json(self) -> None:

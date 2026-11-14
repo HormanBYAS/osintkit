@@ -775,7 +775,9 @@ def build_parser() -> argparse.ArgumentParser:
               osintkit scan -i                     # asistente: tipo y perfil
               osintkit scan 1.1.1.1 -p ip
               osintkit scan usuario -k username --all
+              osintkit scan usuario@gmail.com
               osintkit run username_mass usuario
+              osintkit run email_mass usuario@gmail.com
               osintkit run phone_sources "+34 600 123 456"
               osintkit run dns_records example.com
               osintkit list --kind domain --available

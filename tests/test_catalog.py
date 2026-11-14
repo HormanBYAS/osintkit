@@ -52,6 +52,16 @@ class CatalogTests(unittest.TestCase):
         profile = catalog.PROFILES["username"]
         self.assertIn("username_mass", profile["tools"])
 
+    def test_mass_email_uses_username_database(self) -> None:
+        mass = catalog.get_tool("email_mass")
+        self.assertIsNotNone(mass)
+        self.assertEqual(mass.module, "email_mass")
+        self.assertIn("email", mass.kinds)
+        self.assertIn("email_mass", catalog.PROFILES["email"]["tools"])
+        self.assertIn("email_mass", catalog.PROFILES["email-deep"]["tools"])
+        self.assertNotIn("email_mass", catalog.PROFILES["email-quick"]["tools"])
+        self.assertEqual(catalog.resolve_profile("gmail", "email"), "email")
+
     def test_core_ids_exist(self) -> None:
         for tool_id in (
             "dns_records", "http_probe", "ip_geo", "email_validate",

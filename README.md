@@ -6,10 +6,10 @@ amenazas, búsqueda, geolocalización y metadatos de archivos en una sola interf
 de texto, con CLI, TUI y catálogo de herramientas.
 
 - **Sin dependencias obligatorias**: Python 3.10+ y su biblioteca estándar.
-- **302 capacidades** en 13 categorías: 99 módulos internos, 71 binarios
+- **303 capacidades** en 13 categorías: 100 módulos internos, 71 binarios
   externos opcionales y 132 recursos web.
-- **2.617 sitios** para enumerar usuarios y **70 fuentes** de teléfono.
-- **18 perfiles** de escaneo por tipo de objetivo.
+- **2.617 sitios** para enumerar usuarios y emails, y **70 fuentes** de teléfono.
+- **19 perfiles** de escaneo por tipo de objetivo.
 - **Pasivo por defecto**: las herramientas activas solo se ejecutan si las
   seleccionas y confirmas autorización.
 - Informes en **JSON, Markdown y HTML**.
@@ -54,6 +54,7 @@ osintkit scan example.com
 osintkit scan -i                 # asistente: elige tipo de objetivo y perfil
 osintkit scan 1.1.1.1 -p ip
 osintkit scan analista -k username --all
+osintkit scan analista@gmail.com
 osintkit run dns_records example.com
 osintkit list --kind domain --available
 osintkit doctor -v
@@ -107,7 +108,7 @@ WhatsApp (`wa.me`) como contacto, indicando que la cuenta no se puede verificar
 sin iniciar sesión. Los buscadores públicos pueden limitar las consultas, por
 lo que la ausencia de resultados no demuestra que la cuenta no exista.
 
-### Búsqueda masiva de usuarios
+### Búsqueda masiva de usuarios y emails
 
 `username_mass` usa una base interna de **2.617 sitios** derivada de Maigret
 (licencia MIT) y comprueba el alias con concurrencia, timeout por petición y
@@ -115,21 +116,39 @@ marcadores de presencia/ausencia para reducir falsos positivos. El perfil
 `username` la ejecuta por defecto sobre **los 2.617 sitios**; `username-quick`
 omite la base masiva y `username-deep` añade enumeradores externos opcionales.
 
+`email_mass` reutiliza esos mismos 2.617 sitios para un email o Gmail. Como la
+base busca nombres de usuario, se utiliza la **parte local** de la dirección:
+`analista@gmail.com` se comprueba como `analista`. En Gmail y Googlemail se
+elimina el sufijo `+etiqueta` (`analista+osint@gmail.com` también se busca como
+`analista`). Los perfiles `email` y `email-deep` la ejecutan por defecto;
+`email-quick` omite la base masiva.
+
 ```sh
 # Perfil normal: perfiles populares + base masiva completa
 osintkit scan analista -k username
+osintkit scan analista@gmail.com
 
 # Solo la comprobación rápida
 osintkit scan analista -k username -p username-quick
+osintkit scan analista@gmail.com -p email-quick
 
-# Herramienta masiva suelta
+# Herramientas masivas sueltas
 osintkit run username_mass analista
+osintkit run email_mass analista@gmail.com
 
 # Limitar el escaneo y ajustar concurrencia
 osintkit config set username_mass_limit 2000   # 0 = todos los sitios
 osintkit config set username_mass_workers 48
 osintkit config set username_mass_timeout 8
+osintkit config set email_mass_limit 2000
+osintkit config set email_mass_workers 48
+osintkit config set email_mass_timeout 8
 ```
+
+> La parte local de un email puede coincidir con el alias de otras personas.
+> Los resultados de `email_mass` son **perfiles posibles**, no una prueba de
+> que pertenezcan al titular de la cuenta. Para confirmar una cuenta de Google,
+> usa `ghunt` (perfil `email-deep`) con autorización.
 
 La base se puede actualizar desde Maigret y el archivo
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) conserva la atribución y la
@@ -195,8 +214,9 @@ Perfiles disponibles:
 | `domain-deep` | dominio | + subfinder, amass, httpx, nuclei, ffuf… (activo) |
 | `ip` | IP | geolocalización, ASN, RDAP, reputación, DNSBL |
 | `ip-deep` | IP | + nmap, masscan, traceroute (activo) |
-| `email` | email | validación, Gravatar, PGP, brechas, perfiles directos |
-| `email-deep` | email | + holehe, h8mail, ghunt (activo) |
+| `email` | email | validación, Gravatar, PGP, brechas, perfiles y 2.617 sitios |
+| `email-quick` | email | solo validación y perfiles directos (sin base masiva) |
+| `email-deep` | email | 2.617 sitios + holehe, h8mail, ghunt (activo) |
 | `username` | alias | perfiles populares + 2.617 sitios de la base interna |
 | `username-quick` | alias | solo perfiles populares (sin base masiva) |
 | `username-deep` | alias | 2.000+ sitios + sherlock, maigret, social-analyzer |
@@ -334,6 +354,9 @@ osintkit config set timeout 20
 osintkit config set username_mass_limit 2000
 osintkit config set username_mass_workers 40
 osintkit config set username_mass_timeout 6
+osintkit config set email_mass_limit 2000
+osintkit config set email_mass_workers 40
+osintkit config set email_mass_timeout 6
 osintkit config set report_dir ~/informes/osint
 osintkit config set color false
 ```
@@ -417,7 +440,8 @@ osintkit/
 │   ├── report.py             informes JSON / Markdown / HTML
 │   ├── util.py               detección, hashes y helpers
 │   ├── modules/              módulos internos por dominio
-│   │   └── username_mass.py  enumeración en 2.000+ sitios
+│   │   ├── username_mass.py  enumeración en 2.000+ sitios
+│   │   └── email_mass.py     Gmail/email mediante la parte local
 │   └── data/                 username_sites.json, phone_sources.json
 ├── docs/TOOLS.md             catálogo generado
 ├── tests/                    pruebas unittest

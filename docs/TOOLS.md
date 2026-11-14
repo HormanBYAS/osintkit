@@ -1,6 +1,6 @@
 # Catálogo de herramientas
 
-Total: **302** herramientas en **13** categorías.
+Total: **303** herramientas en **13** categorías.
 
 ## DNS y dominios
 
@@ -134,7 +134,7 @@ _Geolocalización, ASN, reputación y puertos_
 
 ## Email
 
-_Validación, perfiles, brechas y PGP_
+_Validación, perfiles, brechas, PGP y 2.000+ sitios_
 
 | Herramienta | Tipos | Modo | Requiere | Descripción |
 |---|---|---|---|---|
@@ -145,6 +145,7 @@ _Validación, perfiles, brechas y PGP_
 | `email_hunter` | email, domain | módulo | key `HUNTER_API_KEY` | Verificación y fuentes públicas del email (API key). |
 | `emailrep` | email | módulo | key `EMAILREP_API_KEY` | Reputación y perfiles sociales asociados (API key). |
 | `email_dork` | email | módulo | — | Busca el email y devuelve enlaces directos a perfiles y menciones. |
+| `email_mass` | email | módulo | — | Comprueba la parte local del email en más de 2.600 sitios (Maigret, MIT). |
 | `holehe` | email | binario | bin `holehe` | Comprueba en qué servicios está registrado un email. |
 | `ghunt` | email | binario | bin `ghunt` | OSINT de cuentas Google a partir del email. |
 | `h8mail` | email | binario | bin `h8mail` | Búsqueda de credenciales filtradas por email. |
