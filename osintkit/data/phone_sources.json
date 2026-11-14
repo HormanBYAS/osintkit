@@ -1,0 +1,705 @@
+{
+  "source": "osintkit",
+  "updated": "2026-11-14",
+  "count": 70,
+  "sources": [
+    {
+      "name": "Whitepages",
+      "url": "https://www.whitepages.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "reversa",
+        "directorio"
+      ],
+      "description": "Búsqueda inversa y datos de contacto en EE. UU."
+    },
+    {
+      "name": "Spokeo",
+      "url": "https://www.spokeo.com/phone-search?q={phone_q}",
+      "region": "US",
+      "tags": [
+        "reversa",
+        "personas"
+      ],
+      "description": "Búsqueda inversa con perfiles sociales y datos públicos."
+    },
+    {
+      "name": "ZabaSearch",
+      "url": "https://www.zabasearch.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "reversa",
+        "directorio"
+      ],
+      "description": "Directorio inverso de teléfonos y direcciones de EE. UU."
+    },
+    {
+      "name": "AnyWho",
+      "url": "https://www.anywho.com/reverse-phone-lookup/?q={phone_q}",
+      "region": "US",
+      "tags": [
+        "reversa",
+        "directorio"
+      ],
+      "description": "Directorio telefónico y búsqueda inversa."
+    },
+    {
+      "name": "411",
+      "url": "https://www.411.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "reversa",
+        "directorio"
+      ],
+      "description": "Guía telefónica y búsqueda inversa de EE. UU."
+    },
+    {
+      "name": "USPhoneBook",
+      "url": "https://www.usphonebook.com/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "reversa",
+        "directorio"
+      ],
+      "description": "Guía telefónica con nombres y ubicaciones."
+    },
+    {
+      "name": "ReversePhoneLookup",
+      "url": "https://www.reversephonelookup.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "reversa"
+      ],
+      "description": "Búsqueda inversa y reportes de llamadas."
+    },
+    {
+      "name": "PhoneOwner",
+      "url": "https://www.phoneowner.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "reversa",
+        "personas"
+      ],
+      "description": "Información del propietario y ubicación aproximada."
+    },
+    {
+      "name": "Whocalld",
+      "url": "https://whocalld.com/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "reputación",
+        "llamadas"
+      ],
+      "description": "Reportes comunitarios de llamadas y spam."
+    },
+    {
+      "name": "UnknownPhone",
+      "url": "https://www.unknownphone.com/search?q={phone_q}",
+      "region": "Global",
+      "tags": [
+        "reputación",
+        "spam"
+      ],
+      "description": "Comentarios y reportes de números desconocidos."
+    },
+    {
+      "name": "Should I Answer",
+      "url": "https://www.shouldianswer.net/phone/{phone_digits}",
+      "region": "Global",
+      "tags": [
+        "reputación",
+        "spam"
+      ],
+      "description": "Reputación comunitaria y tipo de llamada."
+    },
+    {
+      "name": "WhoCallsMe",
+      "url": "https://www.whocallsme.com/Phone-Number.aspx/{phone_digits}",
+      "region": "Global",
+      "tags": [
+        "reputación",
+        "spam"
+      ],
+      "description": "Foro de reportes de llamadas no deseadas."
+    },
+    {
+      "name": "Tellows",
+      "url": "https://www.tellows.com/num/{phone_digits}",
+      "region": "Global",
+      "tags": [
+        "reputación",
+        "spam"
+      ],
+      "description": "Puntuación de spam y comentarios por número."
+    },
+    {
+      "name": "SpamCalls.net",
+      "url": "https://spamcalls.net/en/search?q={phone_q}",
+      "region": "Global",
+      "tags": [
+        "reputación",
+        "spam"
+      ],
+      "description": "Base de datos colaborativa de llamadas spam."
+    },
+    {
+      "name": "CallerCenter",
+      "url": "https://callercenter.com/{phone_digits}",
+      "region": "Global",
+      "tags": [
+        "reputación",
+        "spam"
+      ],
+      "description": "Reportes de llamadas y números fraudulentos."
+    },
+    {
+      "name": "NumberWay",
+      "url": "https://www.numberway.com/phones/{phone_digits}",
+      "region": "Global",
+      "tags": [
+        "directorio",
+        "internacional"
+      ],
+      "description": "Directorio telefónico internacional por país."
+    },
+    {
+      "name": "Numlookup",
+      "url": "https://www.numlookup.com/?number={phone_q}",
+      "region": "Global",
+      "tags": [
+        "reversa",
+        "operador"
+      ],
+      "description": "Búsqueda inversa y datos del operador."
+    },
+    {
+      "name": "CallerSmart",
+      "url": "https://www.callersmart.com/phone-number/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "reputación",
+        "spam"
+      ],
+      "description": "Identificación colaborativa de llamadas."
+    },
+    {
+      "name": "PeopleFinders",
+      "url": "https://www.peoplefinders.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "reversa"
+      ],
+      "description": "Búsqueda de personas por teléfono."
+    },
+    {
+      "name": "TruthFinder",
+      "url": "https://www.truthfinder.com/phone-lookup/?phone={phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "antecedentes"
+      ],
+      "description": "Búsqueda de personas y antecedentes públicos."
+    },
+    {
+      "name": "BeenVerified",
+      "url": "https://www.beenverified.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "antecedentes"
+      ],
+      "description": "Búsqueda inversa con datos públicos."
+    },
+    {
+      "name": "Intelius",
+      "url": "https://www.intelius.com/phone-lookup/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "antecedentes"
+      ],
+      "description": "Búsqueda de personas por número."
+    },
+    {
+      "name": "Instant Checkmate",
+      "url": "https://www.instantcheckmate.com/phone-lookup/?phone={phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "antecedentes"
+      ],
+      "description": "Búsqueda de antecedentes y contactos."
+    },
+    {
+      "name": "InfoTracer",
+      "url": "https://infotracer.com/phone-lookup/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "reversa"
+      ],
+      "description": "Búsqueda inversa y registros públicos."
+    },
+    {
+      "name": "SearchPeopleFree",
+      "url": "https://www.searchpeoplefree.com/phone-lookup/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "reversa"
+      ],
+      "description": "Búsqueda gratuita de personas y teléfonos."
+    },
+    {
+      "name": "FastPeopleSearch",
+      "url": "https://www.fastpeoplesearch.com/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "reversa"
+      ],
+      "description": "Búsqueda rápida de personas y direcciones."
+    },
+    {
+      "name": "Cyber Background Checks",
+      "url": "https://www.cyberbackgroundchecks.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "antecedentes"
+      ],
+      "description": "Registros públicos y búsqueda inversa."
+    },
+    {
+      "name": "Nuwber",
+      "url": "https://nuwber.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "reversa"
+      ],
+      "description": "Perfiles de personas y datos de contacto."
+    },
+    {
+      "name": "TruePeopleSearch",
+      "url": "https://www.truepeoplesearch.com/results?phoneno={phone_digits}",
+      "region": "US",
+      "tags": [
+        "personas",
+        "reversa"
+      ],
+      "description": "Búsqueda gratuita de personas por teléfono."
+    },
+    {
+      "name": "Addresses.com",
+      "url": "https://www.addresses.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "directorio",
+        "reversa"
+      ],
+      "description": "Directorio de direcciones y teléfonos."
+    },
+    {
+      "name": "PhoneNumberLookup",
+      "url": "https://www.phonenumberlookup.com/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "reversa",
+        "directorio"
+      ],
+      "description": "Búsqueda de números y nombres asociados."
+    },
+    {
+      "name": "PhoneLookup",
+      "url": "https://www.phonelookup.com/phone/{phone_digits}",
+      "region": "US",
+      "tags": [
+        "reversa",
+        "directorio"
+      ],
+      "description": "Consulta de número, operador y ubicación."
+    },
+    {
+      "name": "WhoCalled",
+      "url": "https://whocalled.com/{phone_digits}",
+      "region": "Global",
+      "tags": [
+        "reputación",
+        "spam"
+      ],
+      "description": "Reportes de llamadas y números desconocidos."
+    },
+    {
+      "name": "ScamCallFighters",
+      "url": "https://www.scamcallfighters.com/search?q={phone_q}",
+      "region": "Global",
+      "tags": [
+        "fraude",
+        "spam"
+      ],
+      "description": "Base de datos de llamadas fraudulentas."
+    },
+    {
+      "name": "Phone Scams",
+      "url": "https://www.phonescams.net/?s={phone_q}",
+      "region": "Global",
+      "tags": [
+        "fraude",
+        "spam"
+      ],
+      "description": "Reportes y artículos sobre estafas telefónicas."
+    },
+    {
+      "name": "Scam Numbers",
+      "url": "https://scam-numbers.com/?s={phone_q}",
+      "region": "Global",
+      "tags": [
+        "fraude",
+        "spam"
+      ],
+      "description": "Números reportados por la comunidad."
+    },
+    {
+      "name": "Reverse Australia",
+      "url": "https://www.reverseaustralia.com/lookup/{phone_digits}",
+      "region": "AU",
+      "tags": [
+        "reversa",
+        "directorio"
+      ],
+      "description": "Búsqueda inversa de teléfonos australianos."
+    },
+    {
+      "name": "White Pages Australia",
+      "url": "https://www.whitepages.com.au/residential-phone/{phone_digits}",
+      "region": "AU",
+      "tags": [
+        "directorio"
+      ],
+      "description": "Guía telefónica residencial de Australia."
+    },
+    {
+      "name": "Canada411",
+      "url": "https://www.canada411.ca/search/?stype=si&what={phone_q}",
+      "region": "CA",
+      "tags": [
+        "directorio",
+        "reversa"
+      ],
+      "description": "Guía telefónica canadiense."
+    },
+    {
+      "name": "YellowPages Canada",
+      "url": "https://www.yellowpages.ca/search/si/1/{phone_q}",
+      "region": "CA",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Directorio de empresas y teléfonos de Canadá."
+    },
+    {
+      "name": "PagesJaunes",
+      "url": "https://www.pagesjaunes.fr/annuaire/chercherlespros?quoiqui={phone_q}",
+      "region": "FR",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Directorio telefónico francés."
+    },
+    {
+      "name": "Das Telefonbuch",
+      "url": "https://www.dastelefonbuch.de/Telefonnummern/{phone_digits}",
+      "region": "DE",
+      "tags": [
+        "directorio",
+        "reversa"
+      ],
+      "description": "Guía telefónica alemana."
+    },
+    {
+      "name": "11880",
+      "url": "https://www.11880.com/suche/{phone_q}",
+      "region": "DE",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Directorio y búsqueda inversa alemana."
+    },
+    {
+      "name": "Hitta.se",
+      "url": "https://www.hitta.se/s%C3%B6k/{phone_q}",
+      "region": "SE",
+      "tags": [
+        "directorio",
+        "personas"
+      ],
+      "description": "Directorio sueco de personas y empresas."
+    },
+    {
+      "name": "Eniro",
+      "url": "https://www.eniro.se/s%C3%B6k/{phone_q}",
+      "region": "SE",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Guía telefónica y mapas de Suecia."
+    },
+    {
+      "name": "1881.no",
+      "url": "https://www.1881.no/?query={phone_q}",
+      "region": "NO",
+      "tags": [
+        "directorio",
+        "personas"
+      ],
+      "description": "Directorio telefónico noruego."
+    },
+    {
+      "name": "Gulesider",
+      "url": "https://www.gulesider.no/?q={phone_q}",
+      "region": "NO",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Guía telefónica y mapas de Noruega."
+    },
+    {
+      "name": "Krak",
+      "url": "https://www.krak.dk/{phone_digits}",
+      "region": "DK",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Directorio telefónico danés."
+    },
+    {
+      "name": "Telefoonboek",
+      "url": "https://www.telefoonboek.nl/zoeken/?q={phone_q}",
+      "region": "NL",
+      "tags": [
+        "directorio",
+        "personas"
+      ],
+      "description": "Guía telefónica neerlandesa."
+    },
+    {
+      "name": "Fonecta",
+      "url": "https://www.fonecta.fi/haku/{phone_q}",
+      "region": "FI",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Directorio telefónico finlandés."
+    },
+    {
+      "name": "PaginasAmarillas",
+      "url": "https://www.paginasamarillas.es/search/{phone_q}/all-ma/all-pr/all-is/all-ci/all-ba/all-pu/all-nc/1",
+      "region": "ES",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Páginas amarillas de España."
+    },
+    {
+      "name": "QDQ",
+      "url": "https://www.qdq.com/telefono/{phone_digits}",
+      "region": "ES",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Directorio de teléfonos y empresas de España."
+    },
+    {
+      "name": "Infobel",
+      "url": "https://www.infobel.com/en/world/search?q={phone_q}",
+      "region": "Global",
+      "tags": [
+        "directorio",
+        "internacional"
+      ],
+      "description": "Directorio telefónico internacional."
+    },
+    {
+      "name": "White Pages NZ",
+      "url": "https://www.whitepages.co.nz/phone/{phone_digits}",
+      "region": "NZ",
+      "tags": [
+        "directorio",
+        "reversa"
+      ],
+      "description": "Guía telefónica de Nueva Zelanda."
+    },
+    {
+      "name": "TeleListas",
+      "url": "https://www.telelistas.net/{phone_digits}",
+      "region": "BR",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Guía telefónica brasileña."
+    },
+    {
+      "name": "118000",
+      "url": "https://www.118000.fr/search?part=1&who={phone_q}",
+      "region": "FR",
+      "tags": [
+        "directorio",
+        "reversa"
+      ],
+      "description": "Búsqueda inversa y directorio francés."
+    },
+    {
+      "name": "Annuaire",
+      "url": "https://www.annuaire.com/recherche/?q={phone_q}",
+      "region": "FR",
+      "tags": [
+        "directorio",
+        "personas"
+      ],
+      "description": "Anuario telefónico francés."
+    },
+    {
+      "name": "Telefoonboek België",
+      "url": "https://www.telefoonboek.be/zoeken/?q={phone_q}",
+      "region": "BE",
+      "tags": [
+        "directorio",
+        "personas"
+      ],
+      "description": "Guía telefónica belga."
+    },
+    {
+      "name": "Herold.at",
+      "url": "https://www.herold.at/telefonbuch/{phone_digits}/",
+      "region": "AT",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Directorio telefónico austríaco."
+    },
+    {
+      "name": "search.ch",
+      "url": "https://search.ch/tel/?was={phone_q}",
+      "region": "CH",
+      "tags": [
+        "directorio",
+        "personas"
+      ],
+      "description": "Guía telefónica suiza."
+    },
+    {
+      "name": "local.ch",
+      "url": "https://www.local.ch/en/s/{phone_q}",
+      "region": "CH",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Directorio local y telefonía suiza."
+    },
+    {
+      "name": "Golden Pages Ireland",
+      "url": "https://www.goldenpages.ie/search?q={phone_q}",
+      "region": "IE",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Páginas amarillas de Irlanda."
+    },
+    {
+      "name": "Yell UK",
+      "url": "https://www.yell.com/ucs/UcsSearchAction.do?keywords={phone_q}",
+      "region": "GB",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Directorio de empresas del Reino Unido."
+    },
+    {
+      "name": "192.com",
+      "url": "https://www.192.com/atoz/phone/{phone_digits}/",
+      "region": "GB",
+      "tags": [
+        "directorio",
+        "personas"
+      ],
+      "description": "Búsqueda de personas y teléfonos del Reino Unido."
+    },
+    {
+      "name": "Justdial",
+      "url": "https://www.justdial.com/{phone_digits}",
+      "region": "IN",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Directorio de empresas y servicios de India."
+    },
+    {
+      "name": "Yellow Pages UAE",
+      "url": "https://www.yellowpages-uae.com/search?q={phone_q}",
+      "region": "AE",
+      "tags": [
+        "directorio",
+        "empresas"
+      ],
+      "description": "Páginas amarillas de Emiratos Árabes Unidos."
+    },
+    {
+      "name": "Epieos Phone",
+      "url": "https://epieos.com/?q={phone_q}&t=phone",
+      "region": "Global",
+      "tags": [
+        "cuenta",
+        "google"
+      ],
+      "description": "Comprueba si el número está asociado a una cuenta Google."
+    },
+    {
+      "name": "WhatsApp",
+      "url": "https://wa.me/{phone_digits}",
+      "region": "Global",
+      "tags": [
+        "mensajería",
+        "contacto"
+      ],
+      "description": "Abre un chat directo; no verifica la cuenta sin iniciar sesión."
+    },
+    {
+      "name": "Telegram",
+      "url": "https://t.me/+{phone_digits}",
+      "region": "Global",
+      "tags": [
+        "mensajería",
+        "contacto"
+      ],
+      "description": "Intenta abrir un chat o invitación de Telegram."
+    },
+    {
+      "name": "Signal",
+      "url": "https://signal.me/#p/+{phone_digits}",
+      "region": "Global",
+      "tags": [
+        "mensajería",
+        "contacto"
+      ],
+      "description": "Abre el perfil de Signal si el número está registrado."
+    }
+  ]
+}

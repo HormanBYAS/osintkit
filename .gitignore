@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+
+# Configuración y resultados locales
+config.json
+reports/
+*.log
+
+# Editores y sistema
+.DS_Store
+.idea/
+.vscode/
