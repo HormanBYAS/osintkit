@@ -18,6 +18,8 @@ ALL = (
     "email",
     "username",
     "phone",
+    "device",
+    "plate",
     "org",
     "crypto",
     "url",
@@ -33,6 +35,8 @@ CATEGORIES: dict[str, tuple[str, str]] = {
     "email": ("Email", "Validación, perfiles, brechas, PGP y 2.000+ sitios"),
     "username": ("Usuarios y redes", "Presencia de un alias en múltiples plataformas"),
     "phone": ("Teléfono", "País, formato, reputación y perfiles directos"),
+    "device": ("Dispositivos y SO", "Ciclo de vida, CVEs, firmware y modelos"),
+    "vehicle": ("Vehículos y placas", "Datos públicos, fuentes oficiales y límites legales"),
     "crypto": ("Criptomonedas", "Direcciones BTC/ETH y actividad on-chain"),
     "org": ("Organizaciones", "Registros mercantiles, sanciones y datos abiertos"),
     "threat": ("Amenazas", "CVEs, malware, IOC y reputación"),
@@ -49,6 +53,8 @@ TARGET_TYPES: tuple[tuple[str, str, str], ...] = (
     ("username", "Usuario / alias", "nombre de usuario, nick o perfil público"),
     ("domain", "Dominio / web", "ejemplo.com, subdominio o empresa con web"),
     ("phone", "Teléfono", "+34 600 123 456, número internacional"),
+    ("device", "Dispositivo / SO", "Ubuntu 24.04, Debian 12, Android 14, macOS Sonoma…"),
+    ("plate", "Placa de vehículo", "1234 ABC + país (ES, MX, AR, UK, NL…)"),
     ("ip", "Dirección IP", "8.8.8.8, IPv6 o rango"),
     ("url", "URL completa", "https://ejemplo.com/ruta"),
     ("org", "Organización", "empresa, ONG o entidad pública"),
@@ -1784,6 +1790,98 @@ TOOLS: list[Tool] = [
         tags=("web",),
     ),
     # -----------------------------------------------------------------------
+    # Dispositivos y sistemas operativos
+    # -----------------------------------------------------------------------
+    _tool(
+        "device_lifecycle",
+        "Ciclo de vida del dispositivo",
+        "device",
+        ("device",),
+        "Versión, última actualización, soporte y fin de vida según endoflife.date.",
+        module="device_lifecycle",
+        tags=("gratis", "sin clave", "eol", "endoflife"),
+        timeout=45,
+    ),
+    _tool(
+        "device_advisories",
+        "Avisos y CVEs del dispositivo",
+        "device",
+        ("device",),
+        "Enlaces a boletines del fabricante, NVD, Exploit-DB, GitHub y CISA KEV.",
+        module="device_advisories",
+        tags=("gratis", "sin clave", "cve", "enlaces"),
+    ),
+    _tool(
+        "device_web",
+        "Firmware, manuales y exploits",
+        "device",
+        ("device",),
+        "Busca documentación, actualizaciones, credenciales por defecto y exploits públicos.",
+        module="device_web",
+        tags=("gratis", "sin clave", "búsqueda web"),
+        timeout=120,
+    ),
+    _tool(
+        "device_exploitdb",
+        "Exploit-DB",
+        "device",
+        ("device",),
+        "Búsqueda de exploits públicos para el sistema o modelo indicado.",
+        url="https://www.exploit-db.com/search?q={target}",
+        tags=("web", "exploit"),
+    ),
+    _tool(
+        "searchsploit",
+        "SearchSploit",
+        "device",
+        ("device",),
+        "Consulta local de la base de exploits de Exploit-DB.",
+        cmd="searchsploit {target}",
+        bins=("searchsploit",),
+        install={"void": "sudo xbps-install -S exploitdb"},
+        tags=("externo", "exploit"),
+    ),
+    # -----------------------------------------------------------------------
+    # Vehículos y placas
+    # -----------------------------------------------------------------------
+    _tool(
+        "plate_info",
+        "Validación de placa",
+        "vehicle",
+        ("plate",),
+        "Normaliza la matrícula, resuelve el país y valida el formato de forma orientativa.",
+        module="plate_info",
+        tags=("gratis", "sin clave", "validación"),
+    ),
+    _tool(
+        "plate_lookup",
+        "Consulta pública del vehículo",
+        "vehicle",
+        ("plate",),
+        "Consulta RDW (Países Bajos) o DVLA (Reino Unido) y deriva a fuentes oficiales.",
+        module="plate_lookup",
+        tags=("gratis", "clave opcional", "api", "datos públicos"),
+    ),
+    _tool(
+        "plate_sources",
+        "Fuentes oficiales por país",
+        "vehicle",
+        ("plate",),
+        "Enlaces a registros y portales oficiales, con límites y advertencias legales.",
+        module="plate_sources",
+        tags=("gratis", "sin clave", "fuentes oficiales"),
+    ),
+    _tool(
+        "plate_search",
+        "Menciones públicas de la placa",
+        "vehicle",
+        ("plate",),
+        "Busca anuncios, subastas y menciones públicas; no consulta titulares.",
+        module="plate_search",
+        tags=("gratis", "sin clave", "búsqueda web"),
+        timeout=120,
+    ),
+    # -----------------------------------------------------------------------
     # Criptomonedas
     # -----------------------------------------------------------------------
     _tool(
@@ -1924,7 +2022,7 @@ TOOLS: list[Tool] = [
         "nvd_search",
         "NVD / CVE",
         "threat",
-        ("keyword", "domain", "ip"),
+        ("keyword", "domain", "ip", "device"),
         "Búsqueda de vulnerabilidades en el catálogo del NIST.",
         module="nvd_search",
         tags=("gratis", "sin clave", "cve"),
@@ -2698,6 +2796,30 @@ PROFILES: dict[str, dict[str, object]] = {
             "phone_veriphone", "phone_abstract", "phone_twilio",
         ],
     },
+    "device": {
+        "name": "Dispositivo / SO · pasivo",
+        "kinds": ("device",),
+        "description": "Ciclo de vida, CVEs, avisos, firmware y búsqueda de exploits.",
+        "tools": [
+            "device_lifecycle", "device_advisories", "device_web", "nvd_search",
+            "device_exploitdb",
+        ],
+    },
+    "device-deep": {
+        "name": "Dispositivo / SO · profundo",
+        "kinds": ("device",),
+        "description": "Suma SearchSploit local y mantiene todas las fuentes pasivas.",
+        "tools": [
+            "device_lifecycle", "device_advisories", "device_web", "nvd_search",
+            "device_exploitdb", "searchsploit",
+        ],
+    },
+    "plate": {
+        "name": "Vehículo · placa",
+        "kinds": ("plate",),
+        "description": "Valida la placa, consulta APIs públicas y reúne fuentes oficiales.",
+        "tools": ["plate_info", "plate_lookup", "plate_sources", "plate_search"],
+    },
     "crypto": {
         "name": "Cripto · pasivo",
         "kinds": ("crypto",),
@@ -2772,6 +2894,8 @@ DEFAULT_PROFILES = {
     "email": "email",
     "username": "username",
     "phone": "phone",
+    "device": "device",
+    "plate": "plate",
     "crypto": "crypto",
     "org": "org",
     "url": "url",
@@ -2790,6 +2914,23 @@ PROFILE_ALIASES = {
     "usuario": "username",
     "telefono": "phone",
     "teléfono": "phone",
+    "dispositivo": "device",
+    "so": "device",
+    "os": "device",
+    "linux": "device",
+    "android": "device",
+    "macos": "device",
+    "windows": "device",
+    "ios": "device",
+    "placa": "plate",
+    "patente": "plate",
+    "matricula": "plate",
+    "matrícula": "plate",
+    "vehiculo": "plate",
+    "vehículo": "plate",
+    "vehicle": "plate",
+    "auto": "plate",
+    "car": "plate",
     "organizacion": "org",
     "organización": "org",
     "archivo": "file",
@@ -2825,6 +2966,8 @@ def resolve_profile(name: str | None, kind: str) -> str:
         return DEFAULT_PROFILES.get(kind, "keyword")
     key = name.strip().lower()
     key = PROFILE_ALIASES.get(key, key)
+    if key in {"deep", "profundo"} and f"{kind}-deep" in PROFILES:
+        return f"{kind}-deep"
     if key in PROFILES:
         return key
     if key in DEFAULT_PROFILES:

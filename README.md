@@ -1,15 +1,18 @@
 # osintkit
 
 **Kit de OSINT para terminal, pensado para Void Linux.** Reúne reconocimiento de
-DNS, web, IP, email, usuarios, teléfonos, criptomonedas, organizaciones,
-amenazas, búsqueda, geolocalización y metadatos de archivos en una sola interfaz
-de texto, con CLI, TUI y catálogo de herramientas.
+DNS, web, IP, email, usuarios, teléfonos, dispositivos, vehículos,
+criptomonedas, organizaciones, amenazas, búsqueda, geolocalización y metadatos
+de archivos en una sola interfaz de texto, con CLI, TUI y catálogo de
+herramientas.
 
 - **Sin dependencias obligatorias**: Python 3.10+ y su biblioteca estándar.
-- **303 capacidades** en 13 categorías: 100 módulos internos, 71 binarios
-  externos opcionales y 132 recursos web.
+- **312 capacidades** en 15 categorías: 107 módulos internos, 72 binarios
+  externos opcionales y 133 recursos web.
 - **2.617 sitios** para enumerar usuarios y emails, y **70 fuentes** de teléfono.
-- **19 perfiles** de escaneo por tipo de objetivo.
+- **22 perfiles** de escaneo por tipo de objetivo.
+- **Dispositivos y SO**: ciclo de vida, CVEs, avisos, firmware y exploits.
+- **Vehículos por placa**: RDW/DVLA, datos públicos y fuentes oficiales por país.
 - **Pasivo por defecto**: las herramientas activas solo se ejecutan si las
   seleccionas y confirmas autorización.
 - Informes en **JSON, Markdown y HTML**.
@@ -56,8 +59,12 @@ osintkit scan -i                 # asistente: elige tipo de objetivo y perfil
 osintkit scan 1.1.1.1 -p ip
 osintkit scan analista -k username --all
 osintkit scan analista@gmail.com
+osintkit scan "ubuntu 24.04"
+osintkit scan "android 14" -p device-deep
+osintkit scan "1234 ABC" -k plate --pais ES
 osintkit run dns_records example.com
-osintkit list --kind domain --available
+osintkit run plate_lookup "45-MF-HV" --pais NL
+osintkit list --kind device --available
 osintkit doctor -v
 ```
 
@@ -202,15 +209,83 @@ osintkit run phone_sources "+34 600 123 456"
 osintkit run phone_dork "+34 600 123 456"
 ```
 
+### Dispositivos y sistemas operativos
+
+El tipo `device` investiga un sistema operativo, una versión o un modelo de
+dispositivo. La base local incluye distribuciones Linux (Ubuntu, Debian,
+Fedora, Rocky, AlmaLinux, CentOS, Oracle Linux, Linux Mint, Pop!_OS, openSUSE,
+Alpine, Amazon Linux, NixOS, Slackware, Arch, Void y Gentoo), Android, iOS e
+iPadOS, macOS, Windows, FreeBSD, OpenBSD, NetBSD, además de familias de
+teléfonos, tabletas, relojes y dispositivos de red.
+
+```sh
+osintkit scan "ubuntu 24.04"
+osintkit scan "debian 12" -p device
+osintkit scan "android 14" -p device-deep
+osintkit scan "macos sonoma"
+osintkit scan "windows 11 24h2"
+osintkit scan "iphone 15"
+osintkit scan "pixel 8"
+```
+
+`device_lifecycle` consulta el calendario público de `endoflife.date` y muestra
+lanzamiento, última versión, soporte, fin de vida y soporte extendido cuando
+existen. `device_advisories` reúne boletines del fabricante, NVD, GitHub
+Advisory, CISA KEV y Exploit-DB; `device_web` busca firmware, manuales, avisos y
+exploits públicos. El perfil `device-deep` añade `searchsploit` si está
+instalado localmente.
+
+La detección automática es conservadora: reconoce un sistema operativo conocido
+solo cuando el objetivo incluye versión, edición o modelo (`ubuntu 24.04`,
+`android 14`, `macos sonoma`). Un nombre suelto como `ubuntu` se trata como
+usuario; usa `-k device` para forzarlo. El soporte real puede ser menor que el
+del sistema base, sobre todo en Android y en dispositivos con capas OEM.
+
+> La existencia de un CVE o de un exploit público no demuestra que un
+> dispositivo concreto sea vulnerable. Confirma versión, parche y configuración
+> en la fuente oficial antes de concluir nada.
+
+### Vehículos por matrícula
+
+El tipo `plate` recibe una matrícula y un país. La consulta devuelve los datos
+públicos del vehículo que ofrezca la fuente oficial: marca, modelo, tipo,
+combustible, primera matriculación, cilindrada, masa, plazas, estado de ITV/MOT
+o impuesto, entre otros. **No busca titulares, direcciones ni datos personales.**
+
+```sh
+# País explícito (código ISO o nombre)
+osintkit scan "1234 ABC" -k plate --pais ES
+osintkit run plate_lookup "45-MF-HV" --pais NL
+osintkit run plate_sources "AB12 CDE" --pais GB
+
+# País incluido en el propio objetivo
+osintkit scan "1234ABC, Reino Unido"
+osintkit scan "ES 1234ABC"
+osintkit scan "1234ABC ES"
+```
+
+Países Bajos usa **RDW Open Data**, gratuito y sin clave, con datos técnicos y
+de matriculación. Reino Unido usa la **API oficial de DVLA**, que requiere
+`DVLA_API_KEY`; sin clave se muestra el enlace al portal oficial. Para el resto
+de países, `plate_sources` reúne el organismo oficial, el formato orientativo y
+las limitaciones conocidas. Muchos portales exigen captcha, pago o
+autorización del titular; osintkit no intenta eludir esos controles.
+
+El perfil `plate` solo ejecuta herramientas pasivas: validación local,
+consulta a APIs públicas, fuentes oficiales y búsqueda de menciones públicas de
+la matrícula. Una placa sin país no se puede consultar: si el formato no incluye
+el país, indica `--country`/`--pais` o usa `-k plate`.
+
 ---
 
 ## Interfaz TUI
 
 Al entrar en **Escanear objetivo** la TUI pregunta primero **qué es el
-objetivo** (correo/Gmail, usuario, dominio, teléfono, IP, URL, organización,
-criptomoneda, hash, archivo o texto). Después pide el valor y deja elegir la
-profundidad del escaneo. El informe se abre automáticamente al terminar y se
-puede recorrer con las flechas.
+objetivo** (correo/Gmail, usuario, dominio, teléfono, dispositivo/SO, placa de
+vehículo, IP, URL, organización, criptomoneda, hash, archivo o texto). Después
+pide el valor y deja elegir la profundidad del escaneo. Si eliges una placa,
+la TUI pide también el país. El informe se abre automáticamente al terminar y
+se puede recorrer con las flechas.
 
 | Tecla | Acción |
 |---|---|
@@ -235,8 +310,14 @@ en cian subrayado, de forma parecida a Maigret.
 
 Tipos detectados automáticamente:
 
-`domain`, `ip`, `email`, `username`, `phone`, `org`, `crypto`, `url`, `hash`,
-`file`, `keyword`.
+`domain`, `ip`, `email`, `username`, `phone`, `device`, `plate`, `org`,
+`crypto`, `url`, `hash`, `file`, `keyword`.
+
+La detección de `device` y `plate` es deliberadamente conservadora. Para una
+placa, el país debe ir en el objetivo (`1234ABC ES`) o indicarse con
+`--country`/`--pais`; para un dispositivo, el objetivo debe incluir versión,
+edición o modelo (`android 14`). En los demás casos, fuerza el tipo con
+`-k device` o `-k plate`.
 
 Perfiles disponibles:
 
@@ -254,6 +335,9 @@ Perfiles disponibles:
 | `username-deep` | alias | 2.000+ sitios + sherlock, maigret, social-analyzer |
 | `phone` | teléfono | país, formato, operador, perfiles y 70 directorios |
 | `phone-deep` | teléfono | + phoneinfoga, APIs y buscadores de identificación |
+| `device` | dispositivo / SO | ciclo de vida, CVEs, avisos, firmware y exploits |
+| `device-deep` | dispositivo / SO | + SearchSploit local (sin técnicas de red activas) |
+| `plate` | placa de vehículo | validación, RDW/DVLA, fuentes oficiales y menciones |
 | `crypto` | dirección | BTC, ETH, otras cadenas, fraude |
 | `org` | organización | registros mercantiles, sanciones, Wikidata, mapas |
 | `url` | URL | HTTP, TLS, tecnologías, archivo, reputación |
@@ -305,7 +389,13 @@ osintkit scan example.com \
 ```
 
 `--format none` evita escribir informes. `--dry-run` muestra qué se ejecutaría
-sin hacer ninguna consulta.
+sin hacer ninguna consulta. Para placas, `--country`/`--pais` acepta el código
+ISO o el nombre del país:
+
+```sh
+osintkit scan "1234 ABC" -k plate --pais ES --dry-run
+osintkit run plate_lookup "AB12 CDE" --country GB
+```
 
 ---
 
@@ -343,6 +433,7 @@ Guardar en configuración (permisos `600`):
 ```sh
 osintkit config set-key SHODAN_API_KEY "..."
 osintkit config set-key ABUSECH_AUTH_KEY "..."
+osintkit config set-key DVLA_API_KEY "..."
 osintkit config show
 osintkit config unset-key SHODAN_API_KEY
 ```
@@ -368,6 +459,7 @@ osintkit config unset-key SHODAN_API_KEY
 | `OPENSANCTIONS_API_KEY` | OpenSanctions |
 | `GITHUB_TOKEN` | GitHub (más límite de API) |
 | `NVD_API_KEY` | NVD (opcional) |
+| `DVLA_API_KEY` | DVLA Vehicle Enquiry (Reino Unido) |
 | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` | Twitch |
 | `STEAM_API_KEY` | Steam |
 | `SEC_API_KEY` | SEC EDGAR (opcional) |
@@ -466,6 +558,8 @@ osintkit/
 │   ├── catalog.py            catálogo, perfiles y validación
 │   ├── core.py               registro, contexto y ejecución concurrente
 │   ├── datasets.py           carga de bases internas
+│   ├── devices.py            detección de SO/modelos y ciclos de vida
+│   ├── plates.py             países, normalización y validación de placas
 │   ├── http.py               cliente HTTP con caché, reintentos y rate limit
 │   ├── config.py             configuración XDG y claves
 │   ├── ports.py              nombres de puertos y etiquetado de servicios
@@ -474,8 +568,10 @@ osintkit/
 │   ├── util.py               detección, hashes y helpers
 │   ├── modules/              módulos internos por dominio
 │   │   ├── username_mass.py  enumeración en 2.000+ sitios
-│   │   └── email_mass.py     Gmail/email mediante la parte local
-│   └── data/                 username_sites.json, phone_sources.json
+│   │   ├── email_mass.py     Gmail/email mediante la parte local
+│   │   ├── device.py         ciclo de vida, CVEs, avisos y exploits
+│   │   └── vehicle.py        RDW/DVLA, fuentes y búsqueda de placas
+│   └── data/                 sitios, teléfonos, dispositivos y placas
 ├── docs/TOOLS.md             catálogo generado
 ├── tests/                    pruebas unittest
 └── pyproject.toml
@@ -530,6 +626,13 @@ módulos referenciados y perfiles:
 - Reddit bloquea con frecuencia las consultas anónimas desde centros de datos.
 - Los datos de RDAP/WHOIS pueden estar redactados por privacidad.
 - `theHarvester`, `spiderfoot` y escáneres activos pueden tardar minutos.
+- El calendario de dispositivos depende de `endoflife.date`; los productos sin
+  slug público (Arch, Void, Gentoo) solo ofrecen avisos y búsqueda manual.
+- Las consultas de placas dependen de APIs y portales nacionales. RDW cubre
+  Países Bajos; DVLA requiere clave y cubre Reino Unido. En otros países solo
+  se enlazan fuentes oficiales y el formato puede ser orientativo.
+- Ninguna consulta de placa busca titulares ni datos personales. Los portales
+  que exigen captcha, pago o autorización no se eluden.
 - La TUI requiere una terminal interactiva; en entornos no interactivos usa la
   CLI.
 - Este proyecto no sustituye el juicio de un analista: verifica siempre los

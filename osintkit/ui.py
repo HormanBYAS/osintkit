@@ -12,6 +12,12 @@ from . import catalog
 from .config import KNOWN_KEYS, VERSION, Config
 from .core import ScanResult, load_plugins, run_scan, summarize
 from .report import write_reports
+from .plates import (
+    country_label,
+    normalize_plate,
+    resolve_country,
+    split_plate_country,
+)
 from .summary import final_findings
 from .util import detect_kind, format_duration, normalize_target, truncate
 
@@ -183,6 +189,7 @@ class _App:
         self.scan_target = ""
         self.scan_kind = ""
         self.scan_profile = ""
+        self.scan_country: dict[str, Any] | None = None
         self.scan_step = "kind"  # kind | target | profile
         self.kind_index = 0
         self.profile_options: list[str] = []
@@ -297,6 +304,7 @@ class _App:
                 self.scan_target = ""
                 self.scan_kind = ""
                 self.scan_profile = ""
+                self.scan_country = None
                 self.scan_step = "kind"
                 self.include_active = False
                 self.kind_index = 0
@@ -353,8 +361,22 @@ class _App:
             kind = detect_kind(target)
         else:
             kind = chosen
+        country: dict[str, Any] | None = None
+        if kind == "plate":
+            plate, country = split_plate_country(target)
+            target = normalize_plate(plate)
+            while country is None:
+                screen.put(10, 2, "País de la placa (código o nombre: ES, MX, AR, UK, NL…):", "warn")
+                raw_country = screen.prompt(12, "País:")
+                if not raw_country:
+                    screen.message("El país es obligatorio para consultar una placa.", "warn")
+                    return False
+                country = resolve_country(raw_country)
+                if country is None:
+                    screen.message("País no reconocido. Prueba con el código ISO o el nombre.", "warn")
         self.scan_target = target
         self.scan_kind = kind
+        self.scan_country = country
         self.scan_profile = catalog.resolve_profile(None, kind)
         self.include_active = False
         self._refresh_profile_options()
@@ -411,6 +433,8 @@ class _App:
         y = screen.header("paso 2 de 2 · profundidad del escaneo")
         screen.put(y, 2, f"Objetivo: {self.scan_target}", "good", bold=True)
         screen.put(y + 1, 2, f"Tipo: {self._type_label(self.scan_kind)} ({self.scan_kind})", "info")
+        if self.scan_country:
+            screen.put(y + 2, 2, f"País: {country_label(self.scan_country)}", "info")
         screen.put(y + 3, 2, "Elige el perfil", "title", bold=True)
         start = y + 4
         for index, name in enumerate(self.profile_options):
@@ -494,6 +518,9 @@ class _App:
             self.screen.message("Escribe un objetivo primero.", "warn")
             return
         kind = self.scan_kind or detect_kind(target)
+        if kind == "plate" and not self.scan_country:
+            self.screen.message("Falta el país de la placa. Pulsa «e» y vuelve a escribirla.", "warn")
+            return
         selected = (
             self.profile_options[self.profile_index]
             if self.profile_options and 0 <= self.profile_index < len(self.profile_options)
@@ -518,14 +545,22 @@ class _App:
         self.results = None
         self.result_lines = []
         active_text = "sí" if self.include_active and active_count else "no (solo pasivo)"
+        country_text = (
+            f" · país: {country_label(self.scan_country)}" if self.scan_country else ""
+        )
         self.progress = [
-            f"Objetivo: {target}",
+            f"Objetivo: {target}{country_text}",
             f"Tipo: {self._type_label(kind)} ({kind}) · perfil: {profile}",
             f"{len(tools)} herramientas · técnicas activas: {active_text}",
             "",
         ]
         self.events = queue.Queue()
         self.cancel_event = threading.Event()
+        options = (
+            {"country": str(self.scan_country.get("code") or self.scan_country.get("name") or "")}
+            if self.scan_country
+            else {}
+        )
 
         def worker() -> None:
             try:
@@ -535,6 +570,7 @@ class _App:
                     kind,
                     self.cfg,
                     profile=profile,
+                    options=options,
                     cancel=self.cancel_event,
                     on_event=lambda event, payload: self.events.put((event, payload)),
                 )

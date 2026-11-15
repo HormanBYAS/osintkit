@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from . import (  # noqa: F401
     crypto,
+    device,
     dns,
     email,
     email_mass,
@@ -20,11 +21,13 @@ from . import (  # noqa: F401
     threat,
     username,
     username_mass,
+    vehicle,
     web,
 )
 
 __all__ = [
     "crypto",
+    "device",
     "dns",
     "email",
     "email_mass",
@@ -36,5 +39,6 @@ __all__ = [
     "threat",
     "username",
     "username_mass",
+    "vehicle",
     "web",
 ]

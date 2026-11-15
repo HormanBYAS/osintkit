@@ -139,5 +139,30 @@ class FinalSummaryTests(unittest.TestCase):
         self.assertTrue(any(item["title"].startswith("IP ") for item in payload["final_summary"]))
 
 
+    def test_vehicle_and_device_technical_details(self) -> None:
+        scan = make_scan(
+            Finding("Vehículo", "HARLEY DAVIDSON FLHRSE5", "good"),
+            Finding("Primera matriculación", "2012-12-11", "info"),
+            Finding("Cilindrada", "1801 cm³", "info"),
+            Finding("Ciclo detectado", "24.04 · Noble Numbat", "good"),
+            Finding("Fin de vida", "2029-05-31", "good"),
+            Finding("Última versión", "24.04.5", "info"),
+            Finding("Fuente", "RDW", "link", url="https://opendata.rdw.nl/"),
+            target="45-MF-HV",
+            kind="plate",
+        )
+        names = titles(scan)
+        for title in (
+            "Vehículo",
+            "Primera matriculación",
+            "Cilindrada",
+            "Ciclo detectado",
+            "Fin de vida",
+            "Última versión",
+        ):
+            self.assertIn(title, names)
+        self.assertEqual(by_title(scan, "Direcciones IP encontradas").value, "ninguna en los resultados")
+
+
 if __name__ == "__main__":
     unittest.main()

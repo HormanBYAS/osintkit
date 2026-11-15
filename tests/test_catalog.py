@@ -67,8 +67,34 @@ class CatalogTests(unittest.TestCase):
             "dns_records", "http_probe", "ip_geo", "email_validate",
             "username_presence", "phone_info", "btc_address", "gleif_lei",
             "nvd_search", "ddg_search", "file_hash", "overpass_poi",
+            "device_lifecycle", "device_advisories", "device_web",
+            "plate_info", "plate_lookup", "plate_sources", "plate_search",
         ):
             self.assertIsNotNone(catalog.get_tool(tool_id), tool_id)
+
+    def test_device_and_vehicle_catalog(self) -> None:
+        lifecycle = catalog.get_tool("device_lifecycle")
+        self.assertIsNotNone(lifecycle)
+        self.assertEqual(lifecycle.module, "device_lifecycle")
+        self.assertIn("device", lifecycle.kinds)
+
+        lookup = catalog.get_tool("plate_lookup")
+        self.assertIsNotNone(lookup)
+        self.assertEqual(lookup.module, "plate_lookup")
+        self.assertIn("plate", lookup.kinds)
+
+        nvd = catalog.get_tool("nvd_search")
+        self.assertIsNotNone(nvd)
+        self.assertIn("device", nvd.kinds)
+
+        self.assertIn("device", catalog.DEFAULT_PROFILES)
+        self.assertIn("plate", catalog.DEFAULT_PROFILES)
+        self.assertIn("device_lifecycle", catalog.PROFILES["device"]["tools"])
+        self.assertIn("plate_lookup", catalog.PROFILES["plate"]["tools"])
+        self.assertTrue(catalog.profiles_for_kind("device"))
+        self.assertTrue(catalog.profiles_for_kind("plate"))
+        self.assertEqual(catalog.resolve_profile("placa", "plate"), "plate")
+        self.assertEqual(catalog.resolve_profile("dispositivo", "device"), "device")
 
 
 if __name__ == "__main__":

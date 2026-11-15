@@ -1,0 +1,785 @@
+{
+  "version": 1,
+  "updated": "2026-11-15",
+  "note": "Formatos orientativos y fuentes oficiales. La consulta de titularidad o datos personales no está incluida: usa solo portales públicos y con autorización.",
+  "countries": [
+    {
+      "code": "ES",
+      "name": "España",
+      "aliases": ["espana", "spain", "esp", "espanya"],
+      "api": "",
+      "plate_regex": "^(?:\\d{4}[A-Z]{3}|[A-Z]{1,2}\\d{4}[A-Z]{0,2}|\\d{1,6}[A-Z]{1,2})$",
+      "example": "1234 ABC",
+      "format_note": "Desde 2000: 4 cifras y 3 letras. Las placas antiguas y de motocicleta varían.",
+      "official": [
+        {
+          "name": "DGT · Vehículos",
+          "url": "https://www.dgt.es/es/seguridad-vial/vehiculos/",
+          "description": "Información y trámites oficiales de la Dirección General de Tráfico."
+        },
+        {
+          "name": "DGT · Sede electrónica",
+          "url": "https://sede.dgt.gob.es/",
+          "description": "Trámites que pueden requerir identificación electrónica."
+        }
+      ],
+      "notes": "No hay una API pública gratuita de consulta por matrícula. Algunos informes son de pago y pueden requerir autorización del titular."
+    },
+    {
+      "code": "MX",
+      "name": "México",
+      "aliases": ["mexico", "méxico", "mex"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{5,8}$",
+      "example": "ABC 1234",
+      "format_note": "El formato depende del estado y del tipo de vehículo.",
+      "official": [
+        {
+          "name": "REPUVE",
+          "url": "https://www.repuve.gob.mx/",
+          "description": "Registro Público Vehicular; consulta pública con captcha."
+        }
+      ],
+      "notes": "La consulta puede pedir captcha o datos adicionales. No intentes obtener datos del propietario sin base legal."
+    },
+    {
+      "code": "AR",
+      "name": "Argentina",
+      "aliases": ["argentina", "arg"],
+      "api": "",
+      "plate_regex": "^(?:[A-Z]{3}\\d{3}|[A-Z]{2}\\d{3}[A-Z]{2})$",
+      "example": "AB 123 CD",
+      "format_note": "Mercosur: 2 letras, 3 cifras y 2 letras. El formato anterior era 3 letras y 3 cifras.",
+      "official": [
+        {
+          "name": "DNRPA",
+          "url": "https://www.argentina.gob.ar/justicia/dnrpa",
+          "description": "Dirección Nacional de los Registros Nacionales de la Propiedad del Automotor."
+        }
+      ],
+      "notes": "Los informes de dominio e historial pueden ser arancelados y requerir legitimación."
+    },
+    {
+      "code": "BR",
+      "name": "Brasil",
+      "aliases": ["brasil", "brazil", "bra"],
+      "api": "",
+      "plate_regex": "^(?:[A-Z]{3}\\d{4}|[A-Z]{3}\\d[A-Z]\\d{2})$",
+      "example": "ABC 1D23",
+      "format_note": "Formato antiguo (ABC-1234) y Mercosur (ABC1D23).",
+      "official": [
+        {
+          "name": "Ministério dos Transportes · Trânsito",
+          "url": "https://www.gov.br/transportes/pt-br/assuntos/transito",
+          "description": "Información oficial y enlaces a los Detran estatales."
+        },
+        {
+          "name": "SENATRAN",
+          "url": "https://www.gov.br/transportes/pt-br/assuntos/transito/secretaria-nacional-de-transito",
+          "description": "Autoridad nacional de tránsito."
+        }
+      ],
+      "notes": "Cada estado (Detran) gestiona su consulta; muchas permiten consultar restricciones y multas sin datos personales."
+    },
+    {
+      "code": "CL",
+      "name": "Chile",
+      "aliases": ["chile", "chl"],
+      "api": "",
+      "plate_regex": "^(?:[A-Z]{4}\\d{2}|[A-Z]{2}\\d{4})$",
+      "example": "ABCD 12",
+      "format_note": "Formato nuevo de 4 letras y 2 cifras; también existen placas anteriores.",
+      "official": [
+        {
+          "name": "Registro Civil · Vehículos",
+          "url": "https://www.registrocivil.cl/",
+          "description": "Servicio de Registro Civil e Identificación; consultas y trámites."
+        }
+      ],
+      "notes": "Algunas consultas requieren clave única o pago. No se ofrece búsqueda de propietarios."
+    },
+    {
+      "code": "CO",
+      "name": "Colombia",
+      "aliases": ["colombia", "col"],
+      "api": "",
+      "plate_regex": "^(?:[A-Z]{3}\\d{3}|[A-Z]{3}\\d{2}[A-Z])$",
+      "example": "ABC 123",
+      "format_note": "Automóviles: 3 letras y 3 cifras; motocicletas: 3 letras, 2 cifras y 1 letra.",
+      "official": [
+        {
+          "name": "RUNT · Consulta de vehículos",
+          "url": "https://www.runt.gov.co/consulta-vehiculos",
+          "description": "Registro Único Nacional de Tránsito; consulta pública."
+        }
+      ],
+      "notes": "El RUNT puede mostrar datos técnicos y de tránsito; el titular no se expone sin autorización."
+    },
+    {
+      "code": "PE",
+      "name": "Perú",
+      "aliases": ["peru", "perú", "per"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{6,8}$",
+      "example": "ABC-123",
+      "format_note": "El formato varía entre vehículos particulares, públicos y motocicletas.",
+      "official": [
+        {
+          "name": "SUNARP · Consultas",
+          "url": "https://consultas.sunarp.gob.pe/",
+          "description": "Superintendencia Nacional de los Registros Públicos."
+        }
+      ],
+      "notes": "La consulta de propiedad puede requerir pago, DNI o autorización."
+    },
+    {
+      "code": "UY",
+      "name": "Uruguay",
+      "aliases": ["uruguay", "ury"],
+      "api": "",
+      "plate_regex": "^[A-Z]{3}\\d{4}$",
+      "example": "ABC 1234",
+      "format_note": "Formato orientativo de 3 letras y 4 cifras; hay variantes.",
+      "official": [
+        {
+          "name": "SUCIVE",
+          "url": "https://www.sucive.gub.uy/",
+          "description": "Sistema Único de Cobro de Ingresos Vehiculares."
+        }
+      ],
+      "notes": "Parte de la información es de acceso con identificación o pago."
+    },
+    {
+      "code": "EC",
+      "name": "Ecuador",
+      "aliases": ["ecuador", "ecu"],
+      "api": "",
+      "plate_regex": "^[A-Z]{3}\\d{3,4}$",
+      "example": "ABC 1234",
+      "format_note": "Formato orientativo; varía por provincia y tipo de vehículo.",
+      "official": [
+        {
+          "name": "ANT",
+          "url": "https://www.ant.gob.ec/",
+          "description": "Agencia Nacional de Tránsito."
+        }
+      ],
+      "notes": "No hay API pública gratuita documentada."
+    },
+    {
+      "code": "BO",
+      "name": "Bolivia",
+      "aliases": ["bolivia", "bol"],
+      "api": "",
+      "plate_regex": "^[A-Z]{3}\\d{3,4}$",
+      "example": "ABC 1234",
+      "format_note": "Formato orientativo; la gestión es departamental.",
+      "official": [
+        {
+          "name": "Tránsito Bolivia",
+          "url": "https://www.transito.gob.bo/",
+          "description": "Portal de tránsito y seguridad vial."
+        }
+      ],
+      "notes": "La consulta puede variar por gobernación o municipio."
+    },
+    {
+      "code": "VE",
+      "name": "Venezuela",
+      "aliases": ["venezuela", "ven"],
+      "api": "",
+      "plate_regex": "^[A-Z]{3}\\d{2,3}[A-Z]?$",
+      "example": "AB123CD",
+      "format_note": "Formato orientativo; existen placas antiguas y nuevas.",
+      "official": [
+        {
+          "name": "INTT",
+          "url": "https://www.intt.gob.ve/",
+          "description": "Instituto Nacional de Transporte Terrestre."
+        }
+      ],
+      "notes": "La disponibilidad de consultas públicas es limitada."
+    },
+    {
+      "code": "GB",
+      "name": "Reino Unido",
+      "aliases": ["reino unido", "united kingdom", "uk", "england", "inglaterra", "scotland", "escocia", "wales", "gales", "gb"],
+      "api": "dvla",
+      "plate_regex": "^(?:[A-Z]{2}\\d{2}[A-Z]{3}|[A-Z]\\d{1,3}[A-Z]{3}|[A-Z]{3}\\d{1,3}[A-Z]|[A-Z]{3}\\d{4})$",
+      "example": "AB12 CDE",
+      "format_note": "Formato actual: 2 letras, 2 cifras y 3 letras. Irlanda del Norte usa otro sistema.",
+      "official": [
+        {
+          "name": "DVLA · Vehicle enquiry",
+          "url": "https://www.gov.uk/get-vehicle-information-from-dvla",
+          "description": "Consulta oficial de datos del vehículo por matrícula."
+        },
+        {
+          "name": "DVLA · API de consulta",
+          "url": "https://developer-portal.driver-vehicle-licensing.api.gov.uk/",
+          "description": "API oficial; requiere una clave de DVLA."
+        }
+      ],
+      "notes": "La API oficial necesita DVLA_API_KEY. El portal web puede mostrar impuestos, ITV/MOT y datos técnicos, no el titular."
+    },
+    {
+      "code": "NL",
+      "name": "Países Bajos",
+      "aliases": ["paises bajos", "países bajos", "netherlands", "holland", "holanda", "nld"],
+      "api": "rdw",
+      "plate_regex": "^[A-Z0-9]{4,8}$",
+      "example": "45-MF-HV",
+      "format_note": "Los sidecodes neerlandeses combinan letras y cifras; el RDW usa el valor sin guiones.",
+      "official": [
+        {
+          "name": "RDW · Open Data",
+          "url": "https://opendata.rdw.nl/",
+          "description": "Datos abiertos del vehículo por kenteken (matrícula)."
+        },
+        {
+          "name": "RDW",
+          "url": "https://www.rdw.nl/",
+          "description": "Autoridad neerlandesa de vehículos."
+        }
+      ],
+      "notes": "RDW Open Data es gratuito y no incluye al titular. Es la fuente automática más fiable de este kit."
+    },
+    {
+      "code": "FR",
+      "name": "Francia",
+      "aliases": ["francia", "france", "fra"],
+      "api": "",
+      "plate_regex": "^(?:[A-Z]{2}\\d{3}[A-Z]{2}|\\d{1,4}[A-Z]{1,3}\\d{1,4})$",
+      "example": "AB-123-CD",
+      "format_note": "Sistema SIV: 2 letras, 3 cifras y 2 letras. También existen placas antiguas.",
+      "official": [
+        {
+          "name": "HistoVec",
+          "url": "https://histovec.interieur.gouv.fr/",
+          "description": "Historial oficial de un vehículo usado; requiere matrícula y datos del vendedor."
+        }
+      ],
+      "notes": "HistoVec exige la referencia del informe y datos del vendedor; no es una consulta libre del titular."
+    },
+    {
+      "code": "DE",
+      "name": "Alemania",
+      "aliases": ["alemania", "germany", "deu", "deutschland"],
+      "api": "",
+      "plate_regex": "^[A-Z]{1,3}[A-Z]{1,2}\\d{1,4}[A-Z]?$",
+      "example": "B-AB 1234",
+      "format_note": "1-3 letras de la ciudad, 1-2 letras y 1-4 cifras; puede llevar una letra final.",
+      "official": [
+        {
+          "name": "KBA",
+          "url": "https://www.kba.de/",
+          "description": "Kraftfahrt-Bundesamt; autoridad federal de transporte."
+        }
+      ],
+      "notes": "No hay consulta pública gratuita por matrícula. Los datos del titular están protegidos."
+    },
+    {
+      "code": "IT",
+      "name": "Italia",
+      "aliases": ["italia", "italy", "ita"],
+      "api": "",
+      "plate_regex": "^[A-Z]{2}\\d{3}[A-Z]{2}$",
+      "example": "AB 123 CD",
+      "format_note": "Formato actual de 2 letras, 3 cifras y 2 letras.",
+      "official": [
+        {
+          "name": "Portale dell'Automobilista",
+          "url": "https://www.ilportaledellautomobilista.it/",
+          "description": "Portal oficial del automovilista; consultas y trámites."
+        }
+      ],
+      "notes": "La consulta de propietario no es pública."
+    },
+    {
+      "code": "PT",
+      "name": "Portugal",
+      "aliases": ["portugal", "prt"],
+      "api": "",
+      "plate_regex": "^(?:[A-Z]{2}\\d{2}[A-Z]{2}|\\d{2}[A-Z]{2}\\d{2})$",
+      "example": "AB-12-CD",
+      "format_note": "Formato nuevo y antiguo; el valor compacto elimina guiones.",
+      "official": [
+        {
+          "name": "IMT",
+          "url": "https://www.imt-ip.pt/",
+          "description": "Instituto da Mobilidade e dos Transportes."
+        }
+      ],
+      "notes": "La consulta de titular requiere fundamento legal."
+    },
+    {
+      "code": "BE",
+      "name": "Bélgica",
+      "aliases": ["belgica", "bélgica", "belgium", "bel"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9][A-Z]{3}\\d{3}$",
+      "example": "1-ABC-123",
+      "format_note": "Formato orientativo de 1 carácter, 3 letras y 3 cifras.",
+      "official": [
+        {
+          "name": "SPF Mobilité",
+          "url": "https://mobilit.belgium.be/",
+          "description": "Servicio público federal de movilidad."
+        }
+      ],
+      "notes": "No hay consulta pública libre por matrícula."
+    },
+    {
+      "code": "CH",
+      "name": "Suiza",
+      "aliases": ["suiza", "switzerland", "che", "schweiz"],
+      "api": "",
+      "plate_regex": "^[A-Z]{2}\\d{1,6}$",
+      "example": "ZH 123456",
+      "format_note": "2 letras del cantón y hasta 6 cifras.",
+      "official": [
+        {
+          "name": "ASTRA",
+          "url": "https://www.astra.admin.ch/",
+          "description": "Oficina Federal de Carreteras."
+        }
+      ],
+      "notes": "La consulta depende del cantón y suele requerir autorización."
+    },
+    {
+      "code": "AT",
+      "name": "Austria",
+      "aliases": ["austria", "aut", "österreich", "osterreich"],
+      "api": "",
+      "plate_regex": "^[A-Z]{1,2}\\d{1,5}[A-Z]?$",
+      "example": "W 12345 A",
+      "format_note": "Formato orientativo por distrito.",
+      "official": [
+        {
+          "name": "oesterreich.gv.at",
+          "url": "https://www.oesterreich.gv.at/",
+          "description": "Portal oficial del Estado austriaco."
+        }
+      ],
+      "notes": "No hay consulta pública de titular."
+    },
+    {
+      "code": "IE",
+      "name": "Irlanda",
+      "aliases": ["irlanda", "ireland", "irl", "eire"],
+      "api": "",
+      "plate_regex": "^\\d{2,3}[A-Z]{1,2}\\d{1,5}$",
+      "example": "201-D-12345",
+      "format_note": "Año, condado y número; el formato compacto elimina guiones.",
+      "official": [
+        {
+          "name": "Motor Tax Online",
+          "url": "https://www.motortax.ie/",
+          "description": "Consulta de estado del impuesto de circulación."
+        }
+      ],
+      "notes": "Puede mostrar estado de impuesto; no datos personales del titular."
+    },
+    {
+      "code": "PL",
+      "name": "Polonia",
+      "aliases": ["polonia", "poland", "pol"],
+      "api": "",
+      "plate_regex": "^[A-Z]{2,3}[A-Z0-9]{3,5}$",
+      "example": "WA 12345",
+      "format_note": "Formato orientativo según voivodato.",
+      "official": [
+        {
+          "name": "GOV.PL",
+          "url": "https://www.gov.pl/",
+          "description": "Portal oficial del Gobierno polaco."
+        }
+      ],
+      "notes": "La consulta de datos del vehículo puede requerir identificación."
+    },
+    {
+      "code": "SE",
+      "name": "Suecia",
+      "aliases": ["suecia", "sweden", "swe"],
+      "api": "",
+      "plate_regex": "^[A-Z]{3}\\d{2}[A-Z0-9]$",
+      "example": "ABC 12D",
+      "format_note": "Formato orientativo de 3 letras, 2 cifras y 1 carácter.",
+      "official": [
+        {
+          "name": "Transportstyrelsen",
+          "url": "https://www.transportstyrelsen.se/",
+          "description": "Autoridad sueca de transporte."
+        }
+      ],
+      "notes": "La consulta de propietario está restringida."
+    },
+    {
+      "code": "NO",
+      "name": "Noruega",
+      "aliases": ["noruega", "norway", "nor"],
+      "api": "",
+      "plate_regex": "^[A-Z]{2}\\d{4,5}$",
+      "example": "AB 12345",
+      "format_note": "Formato orientativo de 2 letras y 4-5 cifras.",
+      "official": [
+        {
+          "name": "Statens vegvesen",
+          "url": "https://www.vegvesen.no/",
+          "description": "Administración de carreteras de Noruega."
+        }
+      ],
+      "notes": "Algunos datos del vehículo son públicos; el titular no se expone libremente."
+    },
+    {
+      "code": "DK",
+      "name": "Dinamarca",
+      "aliases": ["dinamarca", "denmark", "dnk"],
+      "api": "",
+      "plate_regex": "^[A-Z]{2}\\d{5}$",
+      "example": "AB 12 345",
+      "format_note": "Formato orientativo de 2 letras y 5 cifras.",
+      "official": [
+        {
+          "name": "Motorregistret",
+          "url": "https://motorregister.skat.dk/",
+          "description": "Registro danés de vehículos."
+        }
+      ],
+      "notes": "La consulta puede requerir MitID."
+    },
+    {
+      "code": "FI",
+      "name": "Finlandia",
+      "aliases": ["finlandia", "finland", "fin"],
+      "api": "",
+      "plate_regex": "^[A-Z]{2,3}\\d{1,4}$",
+      "example": "ABC-123",
+      "format_note": "Formato orientativo.",
+      "official": [
+        {
+          "name": "Traficom",
+          "url": "https://www.traficom.fi/",
+          "description": "Agencia finesa de transporte y comunicaciones."
+        }
+      ],
+      "notes": "La consulta de datos puede requerir identificación."
+    },
+    {
+      "code": "CZ",
+      "name": "Chequia",
+      "aliases": ["chequia", "czechia", "czech republic", "cze"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{5,8}$",
+      "example": "1AB 2345",
+      "format_note": "Formato variable; el compacto elimina espacios.",
+      "official": [
+        {
+          "name": "MD ČR",
+          "url": "https://www.mdcr.cz/",
+          "description": "Ministerio de Transporte de la República Checa."
+        }
+      ],
+      "notes": "No hay consulta pública libre del titular."
+    },
+    {
+      "code": "GR",
+      "name": "Grecia",
+      "aliases": ["grecia", "greece", "grc"],
+      "api": "",
+      "plate_regex": "^[A-Z]{3}\\d{4}$",
+      "example": "ABC 1234",
+      "format_note": "Formato orientativo de 3 letras y 4 cifras.",
+      "official": [
+        {
+          "name": "GOV.GR",
+          "url": "https://www.gov.gr/",
+          "description": "Portal oficial de servicios del Estado griego."
+        }
+      ],
+      "notes": "La disponibilidad de consultas varía."
+    },
+    {
+      "code": "TR",
+      "name": "Turquía",
+      "aliases": ["turquia", "turquía", "turkey", "tur", "türkiye"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{5,8}$",
+      "example": "34 ABC 123",
+      "format_note": "Formato variable por provincia.",
+      "official": [
+        {
+          "name": "e-Devlet",
+          "url": "https://www.turkiye.gov.tr/",
+          "description": "Portal de servicios del Estado turco."
+        }
+      ],
+      "notes": "La consulta de vehículo suele requerir identificación electrónica."
+    },
+    {
+      "code": "RU",
+      "name": "Rusia",
+      "aliases": ["rusia", "russia", "rus"],
+      "api": "",
+      "plate_regex": "^[A-Z]\\d{3}[A-Z]{2}\\d{2,3}$",
+      "example": "A123BC77",
+      "format_note": "Formato orientativo: letra, 3 cifras, 2 letras y código de región.",
+      "official": [
+        {
+          "name": "GIBDD",
+          "url": "https://gibdd.ru/",
+          "description": "Inspección de seguridad vial de Rusia."
+        }
+      ],
+      "notes": "El acceso a datos puede estar restringido."
+    },
+    {
+      "code": "UA",
+      "name": "Ucrania",
+      "aliases": ["ucrania", "ukraine", "ukr"],
+      "api": "",
+      "plate_regex": "^[A-Z]{2}\\d{4}[A-Z]{2}$",
+      "example": "AA 1234 BB",
+      "format_note": "Formato orientativo actual.",
+      "official": [
+        {
+          "name": "HSC",
+          "url": "https://hsc.gov.ua/",
+          "description": "Servicio estatal de seguridad vial de Ucrania."
+        }
+      ],
+      "notes": "La consulta de datos puede requerir identificación."
+    },
+    {
+      "code": "AU",
+      "name": "Australia",
+      "aliases": ["australia", "aus", "aussie"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{4,8}$",
+      "example": "ABC 123",
+      "format_note": "Cada estado y territorio tiene su propio formato y registro.",
+      "official": [
+        {
+          "name": "Service NSW · Check vehicle registration",
+          "url": "https://www.service.nsw.gov.au/transaction/check-vehicle-registration",
+          "description": "Consulta de registro en Nueva Gales del Sur."
+        },
+        {
+          "name": "VicRoads",
+          "url": "https://www.vicroads.vic.gov.au/",
+          "description": "Registro de vehículos de Victoria."
+        }
+      ],
+      "notes": "Indica el estado o territorio para una consulta correcta."
+    },
+    {
+      "code": "NZ",
+      "name": "Nueva Zelanda",
+      "aliases": ["nueva zelanda", "new zealand", "nzl", "nz"],
+      "api": "",
+      "plate_regex": "^[A-Z]{3}\\d{3}$",
+      "example": "ABC 123",
+      "format_note": "Formato orientativo de 3 letras y 3 cifras.",
+      "official": [
+        {
+          "name": "NZTA",
+          "url": "https://www.nzta.govt.nz/",
+          "description": "Agencia de transporte de Nueva Zelanda."
+        }
+      ],
+      "notes": "El historial completo suele ser de pago; evita revendedores no oficiales."
+    },
+    {
+      "code": "JP",
+      "name": "Japón",
+      "aliases": ["japon", "japón", "japan", "jpn"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{4,8}$",
+      "example": "品川 300 あ 12-34",
+      "format_note": "Incluye región, clase y caracteres japoneses; la consulta por matrícula es limitada.",
+      "official": [
+        {
+          "name": "MLIT",
+          "url": "https://www.mlit.go.jp/",
+          "description": "Ministerio de Tierra, Infraestructura, Transporte y Turismo."
+        }
+      ],
+      "notes": "La información del titular no es pública."
+    },
+    {
+      "code": "KR",
+      "name": "Corea del Sur",
+      "aliases": ["corea del sur", "south korea", "korea", "kor"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{4,8}$",
+      "example": "12가 3456",
+      "format_note": "Formato variable; puede incluir caracteres coreanos.",
+      "official": [
+        {
+          "name": "KOTSA",
+          "url": "https://www.kotsa.or.kr/",
+          "description": "Autoridad de seguridad del transporte de Corea."
+        }
+      ],
+      "notes": "La consulta de datos personales está restringida."
+    },
+    {
+      "code": "CN",
+      "name": "China",
+      "aliases": ["china", "chn"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{5,8}$",
+      "example": "京A12345",
+      "format_note": "Incluye carácter de provincia; el formato es regional.",
+      "official": [
+        {
+          "name": "122.gov.cn",
+          "url": "https://www.122.gov.cn/",
+          "description": "Portal de tráfico y seguridad vial de China."
+        }
+      ],
+      "notes": "La consulta pública es limitada y puede requerir identificación."
+    },
+    {
+      "code": "IN",
+      "name": "India",
+      "aliases": ["india", "ind"],
+      "api": "",
+      "plate_regex": "^[A-Z]{2}\\d{1,2}[A-Z]{1,3}\\d{4}$",
+      "example": "KA 01 AB 1234",
+      "format_note": "Código de estado, código RTO, serie y número.",
+      "official": [
+        {
+          "name": "VAHAN",
+          "url": "https://vahan.parivahan.gov.in/",
+          "description": "Sistema nacional de registro de vehículos; consulta con captcha."
+        }
+      ],
+      "notes": "La consulta pública puede mostrar datos técnicos y de registro; no el titular."
+    },
+    {
+      "code": "ZA",
+      "name": "Sudáfrica",
+      "aliases": ["sudafrica", "sudáfrica", "south africa", "zaf", "rsa"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{5,8}$",
+      "example": "CA 123-456",
+      "format_note": "Formato provincial variable.",
+      "official": [
+        {
+          "name": "GOV.ZA",
+          "url": "https://www.gov.za/",
+          "description": "Portal oficial del Gobierno de Sudáfrica."
+        }
+      ],
+      "notes": "La consulta de propietario no es pública."
+    },
+    {
+      "code": "AE",
+      "name": "Emiratos Árabes Unidos",
+      "aliases": ["emiratos arabes unidos", "emiratos árabes unidos", "uae", "united arab emirates", "are"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{4,8}$",
+      "example": "A 12345",
+      "format_note": "Formato variable por emirato.",
+      "official": [
+        {
+          "name": "RTA Dubai",
+          "url": "https://www.rta.ae/",
+          "description": "Autoridad de transporte y carreteras de Dubái."
+        }
+      ],
+      "notes": "La consulta de datos del vehículo suele requerir identificación."
+    },
+    {
+      "code": "SA",
+      "name": "Arabia Saudita",
+      "aliases": ["arabia saudita", "saudi arabia", "sau", "ksa"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{5,8}$",
+      "example": "ABC 1234",
+      "format_note": "Formato orientativo; varía por tipo de placa.",
+      "official": [
+        {
+          "name": "Absher",
+          "url": "https://www.absher.sa/",
+          "description": "Portal de servicios electrónicos del Gobierno saudí."
+        }
+      ],
+      "notes": "Requiere identificación electrónica."
+    },
+    {
+      "code": "MA",
+      "name": "Marruecos",
+      "aliases": ["marruecos", "morocco", "mar"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{5,8}$",
+      "example": "12345-A-1",
+      "format_note": "Formato orientativo; varía por tipo de vehículo.",
+      "official": [
+        {
+          "name": "NARSA",
+          "url": "https://www.narsa.gov.ma/",
+          "description": "Agencia Nacional de Seguridad Vial."
+        }
+      ],
+      "notes": "La consulta pública es limitada."
+    },
+    {
+      "code": "IL",
+      "name": "Israel",
+      "aliases": ["israel", "isr"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{5,8}$",
+      "example": "12-345-67",
+      "format_note": "Formato orientativo; el compacto elimina guiones.",
+      "official": [
+        {
+          "name": "GOV.IL",
+          "url": "https://www.gov.il/",
+          "description": "Portal oficial de servicios del Estado de Israel."
+        }
+      ],
+      "notes": "Puede requerir identificación."
+    },
+    {
+      "code": "US",
+      "name": "Estados Unidos",
+      "aliases": ["estados unidos", "usa", "eeuu", "ee.uu.", "united states", "america", "us"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{1,8}$",
+      "example": "ABC 1234",
+      "format_note": "No hay un formato nacional: cada estado emite sus placas.",
+      "official": [
+        {
+          "name": "NMVTIS · Vehicle history",
+          "url": "https://www.vehiclehistory.gov/",
+          "description": "Sistema oficial de historial de vehículos (suele usar VIN)."
+        },
+        {
+          "name": "USA.gov · Motor vehicle services",
+          "url": "https://www.usa.gov/motor-vehicle-services",
+          "description": "Enlaces a los DMV estatales."
+        }
+      ],
+      "notes": "Indica el estado. La mayoría de los DMV no ofrecen consulta libre por matrícula y los informes pueden ser de pago."
+    },
+    {
+      "code": "CA",
+      "name": "Canadá",
+      "aliases": ["canada", "can"],
+      "api": "",
+      "plate_regex": "^[A-Z0-9]{1,8}$",
+      "example": "ABC 123",
+      "format_note": "Cada provincia o territorio tiene su propio formato.",
+      "official": [
+        {
+          "name": "Canada.ca · Transport",
+          "url": "https://www.canada.ca/en/services/transport.html",
+          "description": "Servicios federales de transporte y enlaces provinciales."
+        }
+      ],
+      "notes": "Indica la provincia. La consulta de titular no es pública."
+    }
+  ]
+}

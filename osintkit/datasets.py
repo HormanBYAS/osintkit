@@ -53,3 +53,35 @@ def phone_sources_meta() -> dict[str, Any]:
     if not isinstance(data, dict):
         return {}
     return {key: value for key, value in data.items() if key != "sources"}
+
+
+def device_products() -> list[dict[str, Any]]:
+    """Sistemas operativos, distribuciones y dispositivos conocidos."""
+    data = _load("device_products.json")
+    products = data.get("products") if isinstance(data, dict) else None
+    if not isinstance(products, list):
+        return []
+    return [item for item in products if isinstance(item, dict)]
+
+
+def device_products_meta() -> dict[str, Any]:
+    data = _load("device_products.json")
+    if not isinstance(data, dict):
+        return {}
+    return {key: value for key, value in data.items() if key != "products"}
+
+
+def vehicle_countries() -> list[dict[str, Any]]:
+    """Países con formatos de placa, fuentes oficiales y APIs disponibles."""
+    data = _load("vehicle_plates.json")
+    countries = data.get("countries") if isinstance(data, dict) else None
+    if not isinstance(countries, list):
+        return []
+    return [item for item in countries if isinstance(item, dict)]
+
+
+def vehicle_countries_meta() -> dict[str, Any]:
+    data = _load("vehicle_plates.json")
+    if not isinstance(data, dict):
+        return {}
+    return {key: value for key, value in data.items() if key != "countries"}

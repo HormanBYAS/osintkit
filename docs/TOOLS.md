@@ -1,6 +1,6 @@
 # Catálogo de herramientas
 
-Total: **303** herramientas en **13** categorías.
+Total: **312** herramientas en **15** categorías.
 
 ## DNS y dominios
 
@@ -281,6 +281,29 @@ _País, formato, reputación y perfiles directos_
 | `phone_src_telegram` | phone | web | — | Intenta abrir un chat o invitación de Telegram. |
 | `phone_src_signal` | phone | web | — | Abre el perfil de Signal si el número está registrado. |
 
+## Dispositivos y SO
+
+_Ciclo de vida, CVEs, firmware y modelos_
+
+| Herramienta | Tipos | Modo | Requiere | Descripción |
+|---|---|---|---|---|
+| `device_lifecycle` | device | módulo | — | Versión, última actualización, soporte y fin de vida según endoflife.date. |
+| `device_advisories` | device | módulo | — | Enlaces a boletines del fabricante, NVD, Exploit-DB, GitHub y CISA KEV. |
+| `device_web` | device | módulo | — | Busca documentación, actualizaciones, credenciales por defecto y exploits públicos. |
+| `device_exploitdb` | device | web | — | Búsqueda de exploits públicos para el sistema o modelo indicado. |
+| `searchsploit` | device | binario | bin `searchsploit` | Consulta local de la base de exploits de Exploit-DB. |
+
+## Vehículos y placas
+
+_Datos públicos, fuentes oficiales y límites legales_
+
+| Herramienta | Tipos | Modo | Requiere | Descripción |
+|---|---|---|---|---|
+| `plate_info` | plate | módulo | — | Normaliza la matrícula, resuelve el país y valida el formato de forma orientativa. |
+| `plate_lookup` | plate | módulo | — | Consulta RDW (Países Bajos) o DVLA (Reino Unido) y deriva a fuentes oficiales. |
+| `plate_sources` | plate | módulo | — | Enlaces a registros y portales oficiales, con límites y advertencias legales. |
+| `plate_search` | plate | módulo | — | Busca anuncios, subastas y menciones públicas; no consulta titulares. |
+
 ## Criptomonedas
 
 _Direcciones BTC/ETH y actividad on-chain_
@@ -315,7 +338,7 @@ _CVEs, malware, IOC y reputación_
 
 | Herramienta | Tipos | Modo | Requiere | Descripción |
 |---|---|---|---|---|
-| `nvd_search` | keyword, domain, ip | módulo | — | Búsqueda de vulnerabilidades en el catálogo del NIST. |
+| `nvd_search` | keyword, domain, ip, device | módulo | — | Búsqueda de vulnerabilidades en el catálogo del NIST. |
 | `circl_cve` | keyword, hash | módulo | — | Ficha CVE con CVSS, referencias y productos afectados. |
 | `epss_score` | keyword | módulo | — | Probabilidad de explotación de una CVE (FIRST.org). |
 | `urlhaus_url` | url, domain | módulo | key `ABUSECH_AUTH_KEY` | URLs maliciosas y payloads asociados (abuse.ch). |

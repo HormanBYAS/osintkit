@@ -492,6 +492,7 @@ def run_scan(
     cfg: Config,
     *,
     profile: str = "",
+    options: dict[str, Any] | None = None,
     no_cache: bool = False,
     concurrency: int | None = None,
     cancel: threading.Event | None = None,
@@ -502,6 +503,7 @@ def run_scan(
     http = new_http(cfg, no_cache=no_cache)
     tools = list(tools)
     scan = ScanResult(target=target, kind=kind, profile=profile)
+    base_options = dict(options or {})
     workers = max(1, int(concurrency or cfg.int("concurrency", 8)))
     max_findings = cfg.int("max_findings", 500)
     lock = threading.Lock()
@@ -522,12 +524,14 @@ def run_scan(
                 status="cancelled",
                 skipped_reason="cancelado",
             )
+        scan_options = dict(base_options)
+        scan_options["_logger"] = lambda msg: emit("log", {"tool": tool.id, "message": msg})
         ctx = Context(
             cfg,
             http,
             target,
             kind,
-            options={"_logger": lambda msg: emit("log", {"tool": tool.id, "message": msg})},
+            options=scan_options,
             timeout=float(tool.timeout or cfg.get("tool_timeout", 90)),
             cancel=cancel,
         )

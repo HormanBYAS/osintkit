@@ -10,7 +10,7 @@ from typing import Any
 from .util import atomic_write, ensure_dir, mask_secret
 
 APP_NAME = "osintkit"
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 CONFIG_VERSION = 1
 
 DEFAULT_SETTINGS: dict[str, Any] = {
@@ -58,6 +58,7 @@ KNOWN_KEYS: dict[str, str] = {
     "OPENSANCTIONS_API_KEY": "OpenSanctions",
     "GITHUB_TOKEN": "GitHub (token)",
     "NVD_API_KEY": "NVD (opcional)",
+    "DVLA_API_KEY": "DVLA Vehicle Enquiry (Reino Unido)",
     "GOOGLE_SAFEBROWSING_API_KEY": "Google Safe Browsing",
     "DEHASHED_API_KEY": "Dehashed",
     "INTELX_API_KEY": "Intelligence X",

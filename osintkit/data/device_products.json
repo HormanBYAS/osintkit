@@ -1,0 +1,347 @@
+{
+  "version": 1,
+  "updated": "2026-11-15",
+  "note": "Catálogo local de sistemas y dispositivos. Los slugs corresponden a endoflife.date; las entradas sin slug usan solo fuentes del fabricante.",
+  "products": [
+    {
+      "slug": "ubuntu",
+      "name": "Ubuntu",
+      "family": "linux",
+      "vendor": "Canonical",
+      "aliases": ["ubuntu", "ubuntu lts"],
+      "security_url": "https://ubuntu.com/security/notices",
+      "vendor_url": "https://ubuntu.com/",
+      "notes": "Incluye versiones LTS e intermedias; el ciclo de vida depende de la edición."
+    },
+    {
+      "slug": "debian",
+      "name": "Debian",
+      "family": "linux",
+      "vendor": "Debian Project",
+      "aliases": ["debian", "debian gnu/linux"],
+      "security_url": "https://www.debian.org/security/",
+      "vendor_url": "https://www.debian.org/",
+      "notes": "Las versiones estables reciben soporte de seguridad durante varios años."
+    },
+    {
+      "slug": "fedora",
+      "name": "Fedora",
+      "family": "linux",
+      "vendor": "Fedora Project",
+      "aliases": ["fedora", "fedora linux", "fedora workstation", "fedora server"],
+      "security_url": "https://fedoraproject.org/security/",
+      "vendor_url": "https://fedoraproject.org/",
+      "notes": "Ciclo corto; conviene comprobar la versión exacta."
+    },
+    {
+      "slug": "rocky-linux",
+      "name": "Rocky Linux",
+      "family": "linux",
+      "vendor": "Rocky Enterprise Software Foundation",
+      "aliases": ["rocky", "rocky linux", "rockylinux"],
+      "security_url": "https://rockylinux.org/security",
+      "vendor_url": "https://rockylinux.org/",
+      "notes": "Compatible con RHEL y con ciclos de soporte largos."
+    },
+    {
+      "slug": "almalinux",
+      "name": "AlmaLinux",
+      "family": "linux",
+      "vendor": "AlmaLinux OS Foundation",
+      "aliases": ["alma", "almalinux", "alma linux"],
+      "security_url": "https://almalinux.org/security/",
+      "vendor_url": "https://almalinux.org/",
+      "notes": "Compatible con RHEL; consulta el ciclo de la versión mayor."
+    },
+    {
+      "slug": "centos",
+      "name": "CentOS",
+      "family": "linux",
+      "vendor": "CentOS Project",
+      "aliases": ["centos", "centos linux"],
+      "security_url": "https://www.centos.org/centos-linux/",
+      "vendor_url": "https://www.centos.org/",
+      "notes": "CentOS Linux terminó su ciclo; CentOS Stream tiene su propio calendario."
+    },
+    {
+      "slug": "centos-stream",
+      "name": "CentOS Stream",
+      "family": "linux",
+      "vendor": "CentOS Project",
+      "aliases": ["centos stream", "stream"],
+      "security_url": "https://www.centos.org/centos-stream/",
+      "vendor_url": "https://www.centos.org/centos-stream/",
+      "notes": "Distribución de desarrollo continuo upstream de RHEL."
+    },
+    {
+      "slug": "oracle-linux",
+      "name": "Oracle Linux",
+      "family": "linux",
+      "vendor": "Oracle",
+      "aliases": ["oracle linux", "oraclelinux", "ol"],
+      "security_url": "https://linux.oracle.com/security/",
+      "vendor_url": "https://www.oracle.com/linux/",
+      "notes": "Compatible con RHEL; dispone de soporte y actualizaciones propias."
+    },
+    {
+      "slug": "linuxmint",
+      "name": "Linux Mint",
+      "family": "linux",
+      "vendor": "Linux Mint",
+      "aliases": ["mint", "linux mint", "linuxmint", "lmde"],
+      "security_url": "https://linuxmint.com/security.php",
+      "vendor_url": "https://linuxmint.com/",
+      "notes": "Basada en Ubuntu LTS o Debian en la edición LMDE."
+    },
+    {
+      "slug": "pop-os",
+      "name": "Pop!_OS",
+      "family": "linux",
+      "vendor": "System76",
+      "aliases": ["pop os", "pop!_os", "pop-os", "popos"],
+      "security_url": "https://system76.com/security",
+      "vendor_url": "https://pop.system76.com/",
+      "notes": "Basada en Ubuntu; el soporte sigue el ciclo de la base."
+    },
+    {
+      "slug": "opensuse",
+      "name": "openSUSE",
+      "family": "linux",
+      "vendor": "openSUSE Project",
+      "aliases": ["opensuse", "open suse", "suse", "suse linux", "tumbleweed", "leap"],
+      "security_url": "https://www.suse.com/security/cve/",
+      "vendor_url": "https://www.opensuse.org/",
+      "notes": "Leap usa versiones estables; Tumbleweed es rolling release."
+    },
+    {
+      "slug": "alpine-linux",
+      "name": "Alpine Linux",
+      "family": "linux",
+      "vendor": "Alpine Linux",
+      "aliases": ["alpine", "alpine linux", "alpinelinux"],
+      "security_url": "https://alpinelinux.org/security/",
+      "vendor_url": "https://alpinelinux.org/",
+      "notes": "Muy usada en contenedores; sus versiones menores tienen soporte corto."
+    },
+    {
+      "slug": "amazon-linux",
+      "name": "Amazon Linux",
+      "family": "linux",
+      "vendor": "Amazon Web Services",
+      "aliases": ["amazon linux", "amazonlinux", "amzn"],
+      "security_url": "https://aws.amazon.com/security/security-bulletins/",
+      "vendor_url": "https://aws.amazon.com/amazon-linux-ami/",
+      "notes": "Diseñada para AWS; comprueba si es Amazon Linux 2 o 2023."
+    },
+    {
+      "slug": "nixos",
+      "name": "NixOS",
+      "family": "linux",
+      "vendor": "NixOS Foundation",
+      "aliases": ["nixos", "nix os"],
+      "security_url": "https://nixos.org/security/",
+      "vendor_url": "https://nixos.org/",
+      "notes": "Rolling release con canales estables e inmutables."
+    },
+    {
+      "slug": "slackware",
+      "name": "Slackware",
+      "family": "linux",
+      "vendor": "Slackware Linux Project",
+      "aliases": ["slackware", "slackware linux"],
+      "security_url": "https://www.slackware.com/security/",
+      "vendor_url": "https://www.slackware.com/",
+      "notes": "Ciclos largos; consulta la versión estable exacta."
+    },
+    {
+      "slug": "",
+      "name": "Arch Linux",
+      "family": "linux",
+      "vendor": "Arch Linux",
+      "aliases": ["arch", "arch linux", "archlinux"],
+      "security_url": "https://security.archlinux.org/",
+      "vendor_url": "https://archlinux.org/",
+      "notes": "Rolling release; no hay un fin de vida por versión, pero sí avisos de seguridad."
+    },
+    {
+      "slug": "",
+      "name": "Void Linux",
+      "family": "linux",
+      "vendor": "Void Linux",
+      "aliases": ["void", "void linux", "voidlinux"],
+      "security_url": "https://voidlinux.org/news/",
+      "vendor_url": "https://voidlinux.org/",
+      "notes": "Rolling release; revisa avisos y paquetes actualizados."
+    },
+    {
+      "slug": "",
+      "name": "Gentoo",
+      "family": "linux",
+      "vendor": "Gentoo Foundation",
+      "aliases": ["gentoo", "gentoo linux"],
+      "security_url": "https://www.gentoo.org/support/security/",
+      "vendor_url": "https://www.gentoo.org/",
+      "notes": "Rolling release; los GLSA documentan avisos de seguridad."
+    },
+    {
+      "slug": "linux",
+      "name": "Linux kernel",
+      "family": "kernel",
+      "vendor": "Linux Kernel Organization",
+      "aliases": ["linux kernel", "kernel", "linux"],
+      "security_url": "https://www.kernel.org/security/",
+      "vendor_url": "https://www.kernel.org/",
+      "notes": "El kernel tiene ramas estables con soporte limitado; indica la versión."
+    },
+    {
+      "slug": "freebsd",
+      "name": "FreeBSD",
+      "family": "bsd",
+      "vendor": "FreeBSD Foundation",
+      "aliases": ["freebsd", "free bsd"],
+      "security_url": "https://www.freebsd.org/security/",
+      "vendor_url": "https://www.freebsd.org/",
+      "notes": "Ramas de producción con soporte de seguridad definido."
+    },
+    {
+      "slug": "openbsd",
+      "name": "OpenBSD",
+      "family": "bsd",
+      "vendor": "OpenBSD Project",
+      "aliases": ["openbsd", "open bsd"],
+      "security_url": "https://www.openbsd.org/security.html",
+      "vendor_url": "https://www.openbsd.org/",
+      "notes": "Publica parches y lanzamientos periódicos."
+    },
+    {
+      "slug": "netbsd",
+      "name": "NetBSD",
+      "family": "bsd",
+      "vendor": "NetBSD Foundation",
+      "aliases": ["netbsd", "net bsd"],
+      "security_url": "https://www.netbsd.org/support/security/",
+      "vendor_url": "https://www.netbsd.org/",
+      "notes": "Consulta las ramas y los avisos de seguridad."
+    },
+    {
+      "slug": "android",
+      "name": "Android",
+      "family": "android",
+      "vendor": "Google / Open Handset Alliance",
+      "aliases": ["android", "android os"],
+      "security_url": "https://source.android.com/docs/security/bulletin",
+      "vendor_url": "https://www.android.com/",
+      "notes": "El soporte real depende del fabricante del dispositivo y de la capa del OEM."
+    },
+    {
+      "slug": "ios",
+      "name": "iOS",
+      "family": "ios",
+      "vendor": "Apple",
+      "aliases": ["ios", "iphone os"],
+      "security_url": "https://support.apple.com/en-us/100100",
+      "vendor_url": "https://www.apple.com/ios/",
+      "notes": "Apple publica avisos por versión y modelo; algunos modelos no reciben la última versión."
+    },
+    {
+      "slug": "ipados",
+      "name": "iPadOS",
+      "family": "ipados",
+      "vendor": "Apple",
+      "aliases": ["ipados", "ipad os"],
+      "security_url": "https://support.apple.com/en-us/100100",
+      "vendor_url": "https://www.apple.com/ipados/",
+      "notes": "El soporte depende del modelo de iPad."
+    },
+    {
+      "slug": "macos",
+      "name": "macOS",
+      "family": "macos",
+      "vendor": "Apple",
+      "aliases": ["macos", "mac os", "os x", "osx", "mac"],
+      "security_url": "https://support.apple.com/en-us/100100",
+      "vendor_url": "https://www.apple.com/macos/",
+      "notes": "Apple suele dar soporte a las tres versiones mayores más recientes."
+    },
+    {
+      "slug": "windows",
+      "name": "Windows",
+      "family": "windows",
+      "vendor": "Microsoft",
+      "aliases": ["windows", "windows 10", "windows 11", "win10", "win11"],
+      "security_url": "https://msrc.microsoft.com/update-guide",
+      "vendor_url": "https://www.microsoft.com/windows/",
+      "notes": "El ciclo depende de la edición y del canal de servicio (Home, Pro, Enterprise, LTSC)."
+    },
+    {
+      "slug": "windows-server",
+      "name": "Windows Server",
+      "family": "windows",
+      "vendor": "Microsoft",
+      "aliases": ["windows server", "win server", "server 2019", "server 2022", "server 2025"],
+      "security_url": "https://msrc.microsoft.com/update-guide",
+      "vendor_url": "https://www.microsoft.com/windows-server/",
+      "notes": "Las versiones LTSC y las ediciones semestrales tienen calendarios distintos."
+    },
+    {
+      "slug": "pixel",
+      "name": "Google Pixel",
+      "family": "android-device",
+      "vendor": "Google",
+      "aliases": ["pixel", "google pixel", "pixel phone"],
+      "security_url": "https://source.android.com/docs/security/bulletin",
+      "vendor_url": "https://store.google.com/category/phones",
+      "notes": "Google publica años de actualizaciones de seguridad por modelo."
+    },
+    {
+      "slug": "samsung-mobile",
+      "name": "Samsung Galaxy",
+      "family": "android-device",
+      "vendor": "Samsung",
+      "aliases": ["samsung", "samsung galaxy", "galaxy", "galaxy s", "galaxy a", "galaxy z"],
+      "security_url": "https://security.samsungmobile.com/securityUpdate.smsb",
+      "vendor_url": "https://www.samsung.com/",
+      "notes": "El soporte varía por modelo y región; Samsung publica boletines mensuales."
+    },
+    {
+      "slug": "fairphone",
+      "name": "Fairphone",
+      "family": "android-device",
+      "vendor": "Fairphone",
+      "aliases": ["fairphone", "fair phone"],
+      "security_url": "https://www.fairphone.com/en/security/",
+      "vendor_url": "https://www.fairphone.com/",
+      "notes": "Dispone de calendarios de soporte por modelo."
+    },
+    {
+      "slug": "iphone",
+      "name": "iPhone",
+      "family": "ios-device",
+      "vendor": "Apple",
+      "aliases": ["iphone"],
+      "security_url": "https://support.apple.com/en-us/100100",
+      "vendor_url": "https://www.apple.com/iphone/",
+      "notes": "El modelo determina la última versión de iOS compatible."
+    },
+    {
+      "slug": "ipad",
+      "name": "iPad",
+      "family": "ipados-device",
+      "vendor": "Apple",
+      "aliases": ["ipad"],
+      "security_url": "https://support.apple.com/en-us/100100",
+      "vendor_url": "https://www.apple.com/ipad/",
+      "notes": "El modelo determina la última versión de iPadOS compatible."
+    },
+    {
+      "slug": "apple-watch",
+      "name": "Apple Watch",
+      "family": "wearable",
+      "vendor": "Apple",
+      "aliases": ["apple watch", "watchos", "watch os"],
+      "security_url": "https://support.apple.com/en-us/100100",
+      "vendor_url": "https://www.apple.com/apple-watch/",
+      "notes": "El soporte depende del modelo y de la versión de watchOS."
+    }
+  ]
+}

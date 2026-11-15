@@ -37,6 +37,13 @@ from .core import (
     tool_state,
 )
 from .http import HttpClient, NetworkError, cache_info, new_http
+from .plates import (
+    compact_plate,
+    country_label,
+    normalize_plate,
+    resolve_country,
+    split_plate_country,
+)
 from .report import FORMATS, render_console, write_reports
 from .util import (
     detect_kind,
@@ -99,11 +106,28 @@ def _load(args: argparse.Namespace) -> tuple[Config, list[str]]:
     return cfg, plugins
 
 
-def _detect(target: str, kind: str | None) -> tuple[str, str]:
+def _detect(
+    target: str,
+    kind: str | None,
+    country: str = "",
+) -> tuple[str, str, dict[str, Any] | None]:
+    """Normaliza el objetivo y resuelve el país de una placa.
+
+    Un ``--country`` explícito convierte un objetivo automático en placa. Si el
+    país viaja dentro del objetivo, se separa para dejar solo la matrícula.
+    """
     normalized = normalize_target(target)
+    explicit = resolve_country(country) if country and country.strip() else None
     if kind and kind != "auto":
-        return normalized, kind
-    return normalized, detect_kind(normalized)
+        chosen = kind
+    elif explicit:
+        chosen = "plate"
+    else:
+        chosen = detect_kind(normalized)
+    if chosen != "plate":
+        return normalized, chosen, explicit
+    plate, resolved = split_plate_country(normalized, country)
+    return normalize_plate(plate), chosen, resolved or explicit
 
 
 def _select_tools(
@@ -202,7 +226,9 @@ def _menu_choice(
         print("Opción no válida; escribe un número de la lista.")
 
 
-def _interactive_scan(args: argparse.Namespace) -> tuple[str, str, str | None, bool] | None:
+def _interactive_scan(
+    args: argparse.Namespace,
+) -> tuple[str, str, str | None, bool, dict[str, Any] | None] | None:
     """Asistente: tipo de objetivo, valor y profundidad del escaneo."""
     kind_default = 0
     if getattr(args, "kind", "auto") and args.kind != "auto":
@@ -218,9 +244,27 @@ def _interactive_scan(args: argparse.Namespace) -> tuple[str, str, str | None, b
     target_raw = getattr(args, "target", "") or _ask("Objetivo: ")
     if not target_raw:
         return None
-    target = normalize_target(target_raw)
-    kind = detect_kind(target) if chosen == "auto" else chosen
-    print(f"\nObjetivo: {target}  ·  tipo: {kind}")
+    target, kind, country = _detect(
+        target_raw,
+        chosen,
+        str(getattr(args, "country", "") or ""),
+    )
+    if kind == "plate" and not country:
+        print("\nPara una placa necesito el país (código o nombre: ES, MX, AR, UK, NL…).")
+        for _attempt in range(3):
+            raw = _ask("País: ")
+            country = resolve_country(raw)
+            if country:
+                break
+            if not raw:
+                print("El país es obligatorio para escanear una placa.")
+                continue
+            print("País no reconocido. Prueba con el código ISO o el nombre en español.")
+        if not country:
+            print("No se puede continuar sin un país válido.")
+            return None
+    label = f"  ·  país: {country_label(country)}" if country else ""
+    print(f"\nObjetivo: {target}  ·  tipo: {kind}{label}")
 
     profile_names = catalog.profiles_for_kind(kind)
     profile_options: list[tuple[str, str, str]] = [
@@ -257,7 +301,7 @@ def _interactive_scan(args: argparse.Namespace) -> tuple[str, str, str | None, b
         if not active:
             print("Usando solo herramientas pasivas del perfil automático.")
             profile = None
-    return target, kind, profile, active
+    return target, kind, profile, active, country
 
 
 
@@ -319,7 +363,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
         if selection is None:
             _err("Escaneo cancelado.")
             return 2
-        target, kind, profile, active = selection
+        target, kind, profile, active, country = selection
         args.target = target
         args.kind = kind
         args.profile = profile
@@ -327,7 +371,26 @@ def cmd_scan(args: argparse.Namespace) -> int:
             args.active = True
             args.yes = True
     else:
-        target, kind = _detect(args.target, args.kind)
+        target, kind, country = _detect(
+            args.target,
+            args.kind,
+            str(getattr(args, "country", "") or ""),
+        )
+    if getattr(args, "country", "") and country is None:
+        _err(
+            "País no reconocido: "
+            f"«{args.country}». Usa un código ISO (ES, MX, AR, UK, NL…) o el nombre."
+        )
+        return 2
+    if kind == "plate" and country is None:
+        _err("Para escanear una placa indica el país con --country/--pais.")
+        _err('Ejemplo: osintkit scan "1234 ABC" -k plate --pais ES')
+        _err('También puedes incluir el país: osintkit scan "1234ABC, Reino Unido"')
+        return 2
+    if kind == "plate" and country is not None and not compact_plate(target):
+        _err("La placa está vacía o no contiene caracteres válidos.")
+        return 2
+    scan_options = {"country": str(country.get("code") or country.get("name") or "")} if country else {}
     if plugins and not args.quiet:
         _err(f"Plugins cargados: {', '.join(plugins)}")
     tools, label = _select_tools(
@@ -343,7 +406,8 @@ def cmd_scan(args: argparse.Namespace) -> int:
         _err(f"No hay herramientas para el tipo «{kind}» con esos filtros.")
         return 2
     if args.dry_run:
-        print(f"Objetivo: {target} ({kind}) · perfil: {label}")
+        context = f" · país: {country_label(country)}" if country else ""
+        print(f"Objetivo: {target} ({kind}){context} · perfil: {label}")
         print(f"Herramientas: {len(tools)}")
         for tool in tools:
             state = _tool_available(tool, cfg)
@@ -354,7 +418,8 @@ def cmd_scan(args: argparse.Namespace) -> int:
         return 2
 
     if not args.quiet:
-        print(f"Objetivo: {target} ({kind})")
+        context = f" · país: {country_label(country)}" if country else ""
+        print(f"Objetivo: {target} ({kind}){context}")
         print(f"Perfil: {label} · {len(tools)} herramientas · concurrencia {args.concurrency or cfg.get('concurrency')}")
         print("")
     cancel = None
@@ -365,6 +430,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
             kind,
             cfg,
             profile=label,
+            options=scan_options,
             no_cache=args.no_cache,
             concurrency=args.concurrency,
             on_event=_progress(args.quiet),
@@ -382,7 +448,6 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
 def cmd_run(args: argparse.Namespace) -> int:
     cfg, _ = _load(args)
-    target, kind = _detect(args.target, args.kind)
     tool = catalog.get_tool(args.tool_id)
     if not tool:
         candidates = [t for t in catalog.TOOLS if args.tool_id in t.id or args.tool_id in t.name.lower()]
@@ -393,11 +458,32 @@ def cmd_run(args: argparse.Namespace) -> int:
             if candidates:
                 _err("Quizá quisiste: " + ", ".join(t.id for t in candidates[:10]))
             return 2
-    if kind not in tool.kinds and not args.kind:
+    target, kind, country = _detect(
+        args.target,
+        args.kind,
+        str(getattr(args, "country", "") or ""),
+    )
+    if getattr(args, "country", "") and country is None:
+        _err(
+            "País no reconocido: "
+            f"«{args.country}». Usa un código ISO (ES, MX, AR, UK, NL…) o el nombre."
+        )
+        return 2
+    if kind not in tool.kinds and (not args.kind or args.kind == "auto") and len(tool.kinds) == 1:
+        target, kind, country = _detect(
+            args.target,
+            tool.kinds[0],
+            str(getattr(args, "country", "") or ""),
+        )
+    if kind not in tool.kinds:
         _err(
             f"«{tool.id}» no admite objetivos de tipo {kind}. "
             f"Tipos válidos: {', '.join(tool.kinds)}"
         )
+        return 2
+    if kind == "plate" and country is None:
+        _err("Para consultar una placa indica el país con --country/--pais.")
+        _err('Ejemplo: osintkit run plate_lookup "1234 ABC" --pais ES')
         return 2
     if not tool.passive and not _confirm_active([tool], args.yes):
         return 2
@@ -407,7 +493,15 @@ def cmd_run(args: argparse.Namespace) -> int:
     from .core import Context, run_tool as _run_tool
 
     http = new_http(cfg, no_cache=args.no_cache)
-    ctx = Context(cfg, http, target, kind, timeout=float(cfg.get("tool_timeout", 90)))
+    options = {"country": str(country.get("code") or country.get("name") or "")} if country else {}
+    ctx = Context(
+        cfg,
+        http,
+        target,
+        kind,
+        options=options,
+        timeout=float(cfg.get("tool_timeout", 90)),
+    )
     result = _run_tool(tool, ctx)
     scan = ScanResult(target=target, kind=kind, profile=tool.id, results=[result])
     scan.duration = result.duration
@@ -764,7 +858,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog=_program_name(),
         description="Kit de OSINT para terminal: DNS, web, IP, email, usuarios, teléfono, "
-                    "cripto, organizaciones, amenazas, búsqueda y archivos.",
+                    "dispositivos, vehículos, cripto, organizaciones, amenazas, búsqueda "
+                    "y archivos.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent(
             """\
@@ -776,6 +871,11 @@ def build_parser() -> argparse.ArgumentParser:
               osintkit scan 1.1.1.1 -p ip
               osintkit scan usuario -k username --all
               osintkit scan usuario@gmail.com
+              osintkit scan "ubuntu 24.04" -k device
+              osintkit scan "android 14" -p device-deep
+              osintkit scan "1234 ABC" -k plate --pais ES
+              osintkit scan "1234ABC, Reino Unido" -p plate
+              osintkit run plate_lookup "45-MF-HV" --pais NL
               osintkit run username_mass usuario
               osintkit run email_mass usuario@gmail.com
               osintkit run phone_sources "+34 600 123 456"
@@ -795,10 +895,18 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command")
 
     scan = sub.add_parser("scan", help="escanea un objetivo con un perfil de herramientas")
-    scan.add_argument("target", nargs="?", default="", help="dominio, IP, email, usuario, teléfono, dirección, URL, hash, archivo o texto")
+    scan.add_argument("target", nargs="?", default="", help="dominio, IP, email, usuario, teléfono, dispositivo, placa, dirección, URL, hash, archivo o texto")
     scan.add_argument("-i", "--interactive", action="store_true", help="asistente para elegir tipo de objetivo y perfil")
     scan.add_argument("-k", "--kind", choices=catalog.ALL + ("auto",), default="auto", help="tipo de objetivo")
     scan.add_argument("-p", "--profile", help="perfil de escaneo (ver: osintkit profiles)")
+    scan.add_argument(
+        "--country",
+        "--pais",
+        dest="country",
+        default="",
+        metavar="PAÍS",
+        help="país de la placa: código ISO o nombre (ES, MX, AR, UK, NL…)",
+    )
     scan.add_argument("-t", "--tools", nargs="+", help="IDs de herramientas concretas")
     scan.add_argument("-c", "--category", help="filtra por categoría")
     scan.add_argument("--all", action="store_true", help="todas las herramientas del tipo (no solo el perfil)")
@@ -816,6 +924,14 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("tool_id", help="ID de la herramienta (ver: osintkit list)")
     run.add_argument("target", help="objetivo")
     run.add_argument("-k", "--kind", choices=catalog.ALL + ("auto",), default="auto")
+    run.add_argument(
+        "--country",
+        "--pais",
+        dest="country",
+        default="",
+        metavar="PAÍS",
+        help="país de la placa: código ISO o nombre",
+    )
     run.add_argument("--yes", action="store_true", help="confirma la autorización")
     run.add_argument("--no-cache", action="store_true")
     run.add_argument("-f", "--format", default="json,md,html")

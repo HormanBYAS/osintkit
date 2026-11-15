@@ -15,6 +15,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
+from .devices import looks_like_device
+from .plates import compact_plate, split_plate_country
+
 # ---------------------------------------------------------------------------
 # Tiempo / texto
 # ---------------------------------------------------------------------------
@@ -260,6 +263,11 @@ def detect_kind(value: str) -> str:
         return "phone"
     if is_domain(value):
         return "domain"
+    plate, country = split_plate_country(value)
+    if country and len(compact_plate(plate)) >= 4:
+        return "plate"
+    if looks_like_device(value):
+        return "device"
     if " " in value:
         return "keyword"
     return "username"
