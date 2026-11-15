@@ -12,6 +12,7 @@ from . import catalog
 from .config import KNOWN_KEYS, VERSION, Config
 from .core import ScanResult, load_plugins, run_scan, summarize
 from .report import write_reports
+from .summary import final_findings
 from .util import detect_kind, format_duration, normalize_target, truncate
 
 # Colores de alto contraste. "muted" usa el color por defecto del terminal
@@ -631,6 +632,27 @@ class _App:
                 marker = {"good": "✓", "warn": "!", "bad": "✗", "link": "→"}.get(finding.level, "·")
                 if finding.url:
                     # Nombre del sitio, detalle y URL con colores distintos.
+                    segments = [(f"  {marker} ", finding.level), (finding.title, "site")]
+                    if (
+                        finding.value
+                        and finding.value != finding.title
+                        and finding.value != finding.url
+                    ):
+                        segments.append((" — ", "muted"))
+                        segments.append((finding.value, "value"))
+                    lines.append(segments)
+                    lines.append([("     ", "muted"), (finding.url, "url")])
+                else:
+                    value = f" — {finding.value}" if finding.value else ""
+                    lines.append([(f"  {finding.title}{value}", finding.level)])
+            lines.append([])
+
+        final = final_findings(scan)
+        if final:
+            lines.append([("RESUMEN FINAL", "title")])
+            for finding in final:
+                marker = {"good": "✓", "warn": "!", "bad": "✗", "link": "→"}.get(finding.level, "·")
+                if finding.url:
                     segments = [(f"  {marker} ", finding.level), (finding.title, "site")]
                     if (
                         finding.value

@@ -47,6 +47,11 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(payload["target"], "example.com")
         self.assertEqual(payload["summary"]["tools"], 3)
         self.assertEqual(payload["summary"]["findings"], 2)
+        self.assertTrue(payload["final_summary"])
+        self.assertTrue(
+            any(item["title"] == "Direcciones IP encontradas" for item in payload["final_summary"])
+        )
+        self.assertTrue(any(item["title"] == "Enlaces destacados" for item in payload["final_summary"]))
 
     def test_markdown(self) -> None:
         text = render_markdown(sample_scan())
@@ -55,6 +60,8 @@ class ReportTests(unittest.TestCase):
         self.assertIn("93.184.216.34", text)
         self.assertIn("https://example.com", text)
         self.assertIn("SHODAN_API_KEY", text)
+        self.assertIn("## Resumen final", text)
+        self.assertIn("Direcciones IP encontradas", text)
 
     def test_html_escapes(self) -> None:
         scan = sample_scan()
@@ -64,6 +71,7 @@ class ReportTests(unittest.TestCase):
         text = render_html(scan)
         self.assertNotIn("<script>alert(1)</script>", text)
         self.assertIn("&lt;script&gt;", text)
+        self.assertIn("Resumen final", text)
 
     def test_console(self) -> None:
         text = render_console(sample_scan(), color=False)
@@ -71,6 +79,9 @@ class ReportTests(unittest.TestCase):
         self.assertIn("Registros DNS", text)
         self.assertIn("93.184.216.34", text)
         self.assertIn("Perfil: domain", text)
+        self.assertIn("RESUMEN FINAL", text)
+        self.assertIn("Direcciones IP encontradas", text)
+        self.assertIn("Enlaces destacados", text)
 
     def test_write_reports(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

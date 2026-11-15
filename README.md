@@ -13,6 +13,7 @@ de texto, con CLI, TUI y catálogo de herramientas.
 - **Pasivo por defecto**: las herramientas activas solo se ejecutan si las
   seleccionas y confirmas autorización.
 - Informes en **JSON, Markdown y HTML**.
+- **Resumen final** con IPs, datos técnicos y enlaces destacados.
 - Claves API por entorno o archivo de configuración, nunca obligatorias.
 - Plugins en Python para ampliar catálogo y módulos.
 
@@ -107,6 +108,37 @@ perfil verificado. En teléfonos se añade además un enlace directo de
 WhatsApp (`wa.me`) como contacto, indicando que la cuenta no se puede verificar
 sin iniciar sesión. Los buscadores públicos pueden limitar las consultas, por
 lo que la ausencia de resultados no demuestra que la cuenta no exista.
+
+### Resumen final: IPs, datos técnicos y enlaces
+
+Todos los resultados, especialmente los de teléfono, número y Gmail/email,
+terminan con un bloque **RESUMEN FINAL** en la consola y la TUI, y con una
+sección equivalente en JSON, Markdown y HTML. El bloque responde a dos
+preguntas:
+
+- **¿Apareció alguna dirección IP?** Se buscan IPv4 e IPv6 únicas en títulos,
+  valores, URLs y metadatos, y se indica su ámbito (pública, privada, loopback)
+  y las herramientas que las mencionan. Si no hay ninguna, se dice
+  explícitamente `ninguna en los resultados`.
+- **¿Qué enlaces conviene abrir?** Se seleccionan hasta 10 enlaces priorizando
+  perfiles directos, URLs que no son páginas de búsqueda y hosts de alto valor
+  (GitHub, LinkedIn, X/Twitter, WhatsApp, Truecaller, Gravatar, etc.). Las
+  búsquedas manuales quedan al final y solo aparecen si aportan información.
+
+También se resumen datos técnicos como ASN, MX, proveedor, país, región,
+operador, tipo de línea o zona horaria. El bloque se genera al renderizar el
+informe, por lo que no altera el conteo de herramientas ni de hallazgos.
+
+```text
+RESUMEN FINAL
+   · Direcciones IP encontradas: ninguna en los resultados
+   · Otros datos técnicos: 2 detectados; se muestran los más relevantes
+   · MX: 5 gmail-smtp-in.l.google.com.
+   · Proveedor: Google Workspace / Gmail
+   · Enlaces destacados: 3 de 12 enlaces; ordenados por perfil directo y relevancia
+   ✓ WhatsApp — perfil directo · Directorios y buscadores de teléfono
+     https://wa.me/34600123456
+```
 
 ### Búsqueda masiva de usuarios y emails
 
@@ -438,6 +470,7 @@ osintkit/
 │   ├── config.py             configuración XDG y claves
 │   ├── ports.py              nombres de puertos y etiquetado de servicios
 │   ├── report.py             informes JSON / Markdown / HTML
+│   ├── summary.py            resumen final de IPs y enlaces
 │   ├── util.py               detección, hashes y helpers
 │   ├── modules/              módulos internos por dominio
 │   │   ├── username_mass.py  enumeración en 2.000+ sitios

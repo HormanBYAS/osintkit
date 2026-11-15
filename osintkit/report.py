@@ -9,6 +9,7 @@ from typing import Any, Iterable
 from .catalog import BY_ID
 from .config import reports_dir
 from .core import Finding, ScanResult, summarize
+from .summary import final_findings
 from .util import format_duration, html_escape, iso_now, slugify
 
 FORMATS = ("json", "md", "html")
@@ -31,6 +32,7 @@ def render_json(scan: ScanResult) -> str:
     payload = scan.as_dict()
     payload["generated_by"] = "osintkit"
     payload["summary_text"] = summarize(scan)
+    payload["final_summary"] = [finding.as_dict() for finding in final_findings(scan)]
     return json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
 
 
@@ -39,6 +41,18 @@ def _tool_title(result: Any) -> str:
     if tool:
         return f"{tool.name} (`{tool.id}`)"
     return f"{result.name} (`{result.tool_id}`)"
+
+
+def _markdown_finding(finding: Finding) -> str:
+    prefix = f"**[{LEVEL_LABELS.get(finding.level, finding.level)}]**"
+    title = finding.title
+    value = finding.value
+    if finding.url:
+        title = f"[{title}]({finding.url})"
+    line = f"- {prefix} {title}"
+    if value:
+        line += f" — {value}"
+    return line
 
 
 def render_markdown(scan: ScanResult) -> str:
@@ -79,16 +93,13 @@ def render_markdown(scan: ScanResult) -> str:
             lines += ["_Sin hallazgos._", ""]
             continue
         for finding in result.findings:
-            prefix = f"**[{LEVEL_LABELS.get(finding.level, finding.level)}]**"
-            title = finding.title
-            value = finding.value
-            if finding.url:
-                title = f"[{title}]({finding.url})"
-            line = f"- {prefix} {title}"
-            if value:
-                line += f" — {value}"
-            lines.append(line)
+            lines.append(_markdown_finding(finding))
         lines.append("")
+
+    lines += ["## Resumen final", ""]
+    for finding in final_findings(scan):
+        lines.append(_markdown_finding(finding))
+    lines.append("")
 
     lines += [
         "---",
@@ -98,6 +109,26 @@ def render_markdown(scan: ScanResult) -> str:
         "",
     ]
     return "\n".join(lines)
+
+
+def _html_finding_items(findings: Iterable[Finding]) -> list[str]:
+    items: list[str] = []
+    for finding in findings:
+        level = html_escape(finding.level)
+        title = html_escape(finding.title)
+        if finding.url:
+            title = (
+                f'<a href="{html_escape(finding.url)}" rel="noopener noreferrer">'
+                f"{title}</a>"
+            )
+        value = html_escape(finding.value)
+        items.append(
+            f'<li class="finding {level}"><span class="dot"></span>'
+            f'<div><strong>{title}</strong>'
+            + (f"<p>{value}</p>" if value else "")
+            + "</div></li>"
+        )
+    return items
 
 
 def render_html(scan: ScanResult) -> str:
@@ -125,22 +156,7 @@ def render_html(scan: ScanResult) -> str:
                 part for part in (result.error, result.skipped_reason) if part
             )
         )
-        items: list[str] = []
-        for finding in result.findings:
-            level = html_escape(finding.level)
-            title = html_escape(finding.title)
-            if finding.url:
-                title = (
-                    f'<a href="{html_escape(finding.url)}" rel="noopener noreferrer">'
-                    f"{title}</a>"
-                )
-            value = html_escape(finding.value)
-            items.append(
-                f'<li class="finding {level}"><span class="dot"></span>'
-                f'<div><strong>{title}</strong>'
-                + (f"<p>{value}</p>" if value else "")
-                + "</div></li>"
-            )
+        items = _html_finding_items(result.findings)
         sections.append(
             "<section class='tool'>"
             f"<h3>{html_escape(_tool_title(result))}</h3>"
@@ -150,6 +166,16 @@ def render_html(scan: ScanResult) -> str:
             + (f"<ul>{''.join(items)}</ul>" if items else "<p><em>Sin hallazgos.</em></p>")
             + "</section>"
         )
+
+    final = final_findings(scan)
+    final_items = _html_finding_items(final)
+    sections.append(
+        "<section class='tool final'>"
+        "<h3>Resumen final</h3>"
+        "<p class='meta'>Direcciones IP, datos técnicos y enlaces con más información.</p>"
+        + (f"<ul>{''.join(final_items)}</ul>" if final_items else "")
+        + "</section>"
+    )
 
     tool_count = len(scan.results)
     findings = scan.finding_count
@@ -274,6 +300,30 @@ def render_console(scan: ScanResult, *, color: bool = True, max_findings: int = 
         f"Perfil: {scan.profile or '—'} · duración: {format_duration(scan.duration)}",
         "",
     ]
+
+    def finding_lines(finding: Finding) -> list[str]:
+        marker = {"good": "✓", "warn": "!", "bad": "✗", "link": "→"}.get(finding.level, "·")
+        if finding.url:
+            site = finding.title
+            detail = ""
+            if (
+                finding.value
+                and finding.value != finding.title
+                and finding.value != finding.url
+            ):
+                detail = finding.value
+            if color:
+                line = f"   {colorize(marker, finding.level)} {colorize(site, 'site')}"
+                if detail:
+                    line += colorize(f" — {detail}", "value")
+            else:
+                line = f"   {marker} {site}" + (f" — {detail}" if detail else "")
+            url_line = f"     {finding.url}"
+            return [line, colorize(url_line, "url") if color else url_line]
+        value = f": {finding.value}" if finding.value else ""
+        line = f"   {marker} {finding.title}{value}"
+        return [colorize(line, finding.level) if color else line]
+
     for result in scan.results:
         if result.status == "ok" and not result.findings:
             continue
@@ -297,31 +347,17 @@ def render_console(scan: ScanResult, *, color: bool = True, max_findings: int = 
             )
         shown = result.findings if max_findings <= 0 else result.findings[:max_findings]
         for finding in shown:
-            marker = {"good": "✓", "warn": "!", "bad": "✗", "link": "→"}.get(finding.level, "·")
-            if finding.url:
-                site = finding.title
-                detail = ""
-                if (
-                    finding.value
-                    and finding.value != finding.title
-                    and finding.value != finding.url
-                ):
-                    detail = finding.value
-                if color:
-                    line = f"   {colorize(marker, finding.level)} {colorize(site, 'site')}"
-                    if detail:
-                        line += colorize(f" — {detail}", "value")
-                else:
-                    line = f"   {marker} {site}" + (f" — {detail}" if detail else "")
-                lines.append(line)
-                url_line = f"     {finding.url}"
-                lines.append(colorize(url_line, "url") if color else url_line)
-            else:
-                value = f": {finding.value}" if finding.value else ""
-                line = f"   {marker} {finding.title}{value}"
-                lines.append(colorize(line, finding.level) if color else line)
+            lines.extend(finding_lines(finding))
         if max_findings > 0 and len(result.findings) > max_findings:
             hidden = len(result.findings) - max_findings
             lines.append(f"   … {hidden} hallazgos más (el informe completo está en los archivos)")
+        lines.append("")
+
+    final = final_findings(scan)
+    if final:
+        header = "RESUMEN FINAL"
+        lines.append(colorize(header, "title") if color else header)
+        for finding in final:
+            lines.extend(finding_lines(finding))
         lines.append("")
     return "\n".join(lines)
