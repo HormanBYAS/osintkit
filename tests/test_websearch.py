@@ -120,8 +120,44 @@ class EmailPhoneDirectLinkTests(unittest.TestCase):
         by_title = {item.title: item for item in findings}
         self.assertIn("WhatsApp · contacto directo", by_title)
         self.assertEqual(by_title["WhatsApp · contacto directo"].url, "https://wa.me/34600123456")
+        self.assertTrue(by_title["WhatsApp · contacto directo"].data.get("contact_link"))
         self.assertIn("Búsqueda manual", by_title)
         self.assertIn("duckduckgo.com", by_title["Búsqueda manual"].url)
+
+    def test_phone_variants_expand_international_formats(self) -> None:
+        variants = phone_module._phone_variants("+34 600 123 456")
+        self.assertIn("+34600123456", variants)
+        self.assertIn("600123456", variants)
+        self.assertIn("600 123 456", variants)
+        self.assertEqual(phone_module._phone_variants("600123456"), ["600123456"])
+
+    def test_phone_dork_uses_all_variants_and_more_results(self) -> None:
+        ctx = mock.Mock(target="+34 600 123 456", kind="phone")
+        with mock.patch.object(phone_module, "resolve_direct", return_value=[]) as search:
+            phone_module.phone_dork(ctx, None)
+        queries = search.call_args.args[1]
+        kwargs = search.call_args.kwargs
+        self.assertTrue(any("600 123 456" in query for query in queries))
+        self.assertIn("600 123 456", kwargs["terms"])
+        self.assertEqual(kwargs["limit"], 50)
+
+    def test_phone_sources_are_marked_as_directories(self) -> None:
+        ctx = mock.Mock(target="+34 600 123 456", kind="phone")
+        findings = phone_module.phone_sources(ctx, None)
+        links = [item for item in findings if item.url]
+        self.assertTrue(links)
+        self.assertTrue(all(item.data.get("source_directory") for item in links))
+
+    def test_email_dork_adds_general_and_document_queries(self) -> None:
+        ctx = mock.Mock(target="foo@example.com", kind="email")
+        with mock.patch.object(email_module, "_github_email_profiles", return_value=[]), \
+                mock.patch.object(email_module, "resolve_direct", return_value=[]) as search:
+            email_module.email_dork(ctx, None)
+        queries = search.call_args.args[1]
+        kwargs = search.call_args.kwargs
+        self.assertIn('"foo@example.com"', queries)
+        self.assertTrue(any("filetype:pdf" in query for query in queries))
+        self.assertEqual(kwargs["limit"], 60)
 
 
 if __name__ == "__main__":

@@ -333,9 +333,21 @@ def email_dork(ctx: Context, tool: Any) -> list[Finding]:
         f'"{email}" (site:facebook.com OR site:linkedin.com OR site:instagram.com '
         f'OR site:x.com OR site:twitter.com OR site:tiktok.com OR site:github.com '
         f'OR site:gitlab.com OR site:keybase.io OR site:about.me OR site:gravatar.com)',
-        f'"{email}" (site:pastebin.com OR site:rentry.co OR site:ghostbin.co)',
+        f'"{email}" (site:keybase.io OR site:about.me OR site:gravatar.com '
+        f'OR site:gitlab.com OR site:bitbucket.org OR site:sourceforge.net '
+        f'OR site:medium.com OR site:dev.to OR site:behance.net '
+        f'OR site:dribbble.com OR site:stackoverflow.com)',
+        f'"{email}" (site:pastebin.com OR site:rentry.co OR site:ghostbin.co '
+        f'OR site:justpaste.it OR site:telegra.ph OR site:scribd.com OR '
+        f'site:issuu.com)',
+        f'"{email}" (site:haveibeenpwned.com OR site:dehashed.com '
+        f'OR site:leakcheck.io OR site:intelx.io OR site:epieos.com '
+        f'OR site:usersearch.org)',
+        f'"{email}" (filetype:pdf OR filetype:doc OR filetype:xlsx OR '
+        f'filetype:csv OR filetype:txt)',
+        f'"{email}"',
     ]
-    hits = resolve_direct(ctx, queries, terms=[email], limit=15)
+    hits = resolve_direct(ctx, queries, terms=[email], limit=60)
     for hit in hits:
         if hit.url in seen:
             continue

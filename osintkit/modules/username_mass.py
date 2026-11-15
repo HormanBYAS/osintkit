@@ -311,12 +311,11 @@ def _mass_scan(
                 detail or url,
                 "good",
                 url=url,
-                data={
-                    "site": name,
-                    "database": "Maigret",
-                    "license": "MIT",
-                    "query": query,
-                },
+                site=name,
+                database="Maigret",
+                license="MIT",
+                query=query,
+                direct_profile=True,
             )
         )
     if not found:

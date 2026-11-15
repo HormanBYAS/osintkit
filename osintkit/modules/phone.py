@@ -86,6 +86,32 @@ def _split_country(number: str) -> tuple[str, str, str]:
     return "", "", digits
 
 
+def _phone_variants(number: str) -> list[str]:
+    """Formatos habituales de un número para ampliar las búsquedas pasivas.
+
+    Se incluyen el texto original, E.164 sin espacios, solo dígitos y el formato
+    nacional cuando el objetivo trae prefijo internacional. No se inventan
+    variantes para números nacionales sin prefijo para evitar falsos positivos.
+    """
+    raw = number.strip()
+    digits = phone_digits(raw)
+    international = raw.startswith("+") or raw.startswith("00")
+    intl_digits = digits[2:] if raw.startswith("00") else digits
+    values = [raw]
+    if international and intl_digits:
+        values.extend((f"+{intl_digits}", intl_digits))
+    else:
+        values.append(digits)
+    if international and intl_digits:
+        prefix, _country, rest = _split_country(f"+{intl_digits}")
+        if prefix and rest:
+            values.extend((rest, f"+{prefix} {rest}", f"{prefix} {rest}"))
+            if len(rest) == 9:
+                national = f"{rest[:3]} {rest[3:6]} {rest[6:]}"
+                values.extend((national, f"+{prefix} {national}"))
+    return dedupe(values)
+
+
 @module("phone_info")
 def phone_info(ctx: Context, tool: Any) -> list[Finding]:
     raw = ctx.target.strip()
@@ -152,22 +178,26 @@ def phone_dork(ctx: Context, tool: Any) -> list[Finding]:
     """Busca el número y devuelve enlaces directos a perfiles o menciones."""
     number = ctx.target.strip()
     digits = phone_digits(number)
-    canonical = number if number.startswith("+") else (f"+{digits}" if digits else number)
-    variants = [value for value in dedupe([number, canonical, digits]) if value]
-    compact = digits or canonical
+    variants = _phone_variants(number)
+    quoted = " OR ".join(f'"{value}"' for value in variants[:5])
+    compact = digits or number
     queries = [
-        f'"{number}" (site:facebook.com OR site:linkedin.com OR '
-        f'site:instagram.com OR site:tiktok.com OR site:x.com OR site:twitter.com)',
-        f'"{compact}" (site:wa.me OR site:truecaller.com OR '
-        f'site:sync.me OR site:t.me OR site:telegram.me OR site:signal.me)',
-        f'"{compact}" (site:whitepages.com OR site:spokeo.com OR '
-        f'site:zabasearch.com OR site:anywho.com OR site:411.com)',
-        f'"{compact}" (site:tellows.com OR site:whocallsme.com OR '
-        f'site:shouldianswer.net OR site:callercenter.com OR site:whocalld.com)',
-        f'"{number}" (site:pastebin.com OR site:rentry.co OR '
-        f'site:ghostbin.co OR site:telegra.ph)',
+        f'({quoted}) (site:facebook.com OR site:linkedin.com OR '
+        f'site:instagram.com OR site:tiktok.com OR site:x.com OR site:twitter.com '
+        f'OR site:vk.com OR site:ok.ru)',
+        f'"{compact}" (site:wa.me OR site:truecaller.com OR site:sync.me '
+        f'OR site:callapp.com OR site:t.me OR site:telegram.me OR site:signal.me)',
+        f'({quoted}) (site:whitepages.com OR site:spokeo.com OR '
+        f'site:zabasearch.com OR site:anywho.com OR site:411.com OR '
+        f'site:fastpeoplesearch.com OR site:yellowpages.com)',
+        f'({quoted}) (site:tellows.com OR site:whocallsme.com OR '
+        f'site:800notes.com OR site:shouldianswer.net OR site:callercenter.com '
+        f'OR site:whocalld.com)',
+        f'({quoted}) (site:pastebin.com OR site:rentry.co OR '
+        f'site:ghostbin.co OR site:telegra.ph OR site:justpaste.it)',
+        f'({quoted})',
     ]
-    hits = resolve_direct(ctx, queries, terms=variants, limit=20)
+    hits = resolve_direct(ctx, queries, terms=variants, limit=50)
     findings: list[Finding] = []
     for hit in hits:
         direct = is_profile_url(hit.url)
@@ -195,6 +225,7 @@ def phone_dork(ctx: Context, tool: Any) -> list[Finding]:
                     "abre el chat; WhatsApp no permite verificar la cuenta sin iniciar sesión",
                     "link",
                     url=f"https://wa.me/{digits}",
+                    contact_link=True,
                 )
             )
         findings.append(
@@ -309,7 +340,9 @@ def phone_sources(ctx: Context, tool: Any) -> list[Finding]:
                 detail or "consulta manual",
                 "link",
                 url=render_template(template, ctx.target, ctx.kind),
-                data={"region": region, "tags": tags},
+                region=region,
+                tags=tags,
+                source_directory=True,
             )
         )
     return findings

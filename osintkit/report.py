@@ -172,7 +172,7 @@ def render_html(scan: ScanResult) -> str:
     sections.append(
         "<section class='tool final'>"
         "<h3>Resumen final</h3>"
-        "<p class='meta'>Direcciones IP, datos técnicos y enlaces con más información.</p>"
+        "<p class='meta'>Direcciones IP, datos técnicos y páginas o perfiles encontrados.</p>"
         + (f"<ul>{''.join(final_items)}</ul>" if final_items else "")
         + "</section>"
     )

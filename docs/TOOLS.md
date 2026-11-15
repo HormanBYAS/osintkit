@@ -144,7 +144,7 @@ _Validación, perfiles, brechas, PGP y 2.000+ sitios_
 | `email_hibp` | email | módulo | key `HIBP_API_KEY` | Brechas conocidas asociadas al email (API key). |
 | `email_hunter` | email, domain | módulo | key `HUNTER_API_KEY` | Verificación y fuentes públicas del email (API key). |
 | `emailrep` | email | módulo | key `EMAILREP_API_KEY` | Reputación y perfiles sociales asociados (API key). |
-| `email_dork` | email | módulo | — | Busca el email y devuelve enlaces directos a perfiles y menciones. |
+| `email_dork` | email | módulo | — | Busca el email en perfiles, documentos, filtraciones y menciones directas. |
 | `email_mass` | email | módulo | — | Comprueba la parte local del email en más de 2.600 sitios (Maigret, MIT). |
 | `holehe` | email | binario | bin `holehe` | Comprueba en qué servicios está registrado un email. |
 | `ghunt` | email | binario | bin `ghunt` | OSINT de cuentas Google a partir del email. |
@@ -200,7 +200,7 @@ _País, formato, reputación y perfiles directos_
 | Herramienta | Tipos | Modo | Requiere | Descripción |
 |---|---|---|---|---|
 | `phone_info` | phone | módulo | — | Normaliza a E.164, detecta país y tipo de línea (con libphonenumber si está). |
-| `phone_dork` | phone | módulo | — | Busca el número y devuelve enlaces directos a perfiles y menciones. |
+| `phone_dork` | phone | módulo | — | Busca el número en todos sus formatos y devuelve perfiles y menciones. |
 | `phone_sources` | phone | módulo | — | Genera enlaces a 70 directorios, buscadores inversos y fuentes de reputación. |
 | `phone_veriphone` | phone | módulo | key `VERIPHONE_API_KEY` | Valida el número y devuelve país, operador y tipo de línea (API key). |
 | `phone_abstract` | phone | módulo | key `ABSTRACT_PHONE_API_KEY` | Validación y datos del número con Abstract API (API key). |

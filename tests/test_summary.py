@@ -6,7 +6,12 @@ import json
 import unittest
 
 from osintkit.core import Finding, ScanResult, ToolResult
-from osintkit.report import render_console, render_json
+from osintkit.report import (
+    render_console,
+    render_html,
+    render_json,
+    render_markdown,
+)
 from osintkit.summary import MAX_LINKS, final_findings
 
 
@@ -109,6 +114,7 @@ class FinalSummaryTests(unittest.TestCase):
                 url="https://wa.me/34600123456/",
                 data={"direct_profile": True},
             ),
+            kind="keyword",
         )
         final = final_findings(scan)
         links = [item for item in final if item.url]
@@ -127,7 +133,7 @@ class FinalSummaryTests(unittest.TestCase):
             Finding(f"Perfil {index}", "ficha", "link", url=f"https://example.com/{index}")
             for index in range(MAX_LINKS + 5)
         )
-        scan = make_scan(*findings)
+        scan = make_scan(*findings, kind="keyword")
         final = final_findings(scan)
         links = [item for item in final if item.url]
         self.assertEqual(len(links), MAX_LINKS)
@@ -138,6 +144,118 @@ class FinalSummaryTests(unittest.TestCase):
         self.assertTrue(any(item["title"] == "Enlaces destacados" for item in payload["final_summary"]))
         self.assertTrue(any(item["title"].startswith("IP ") for item in payload["final_summary"]))
 
+
+    def test_phone_summary_lists_every_page_and_identity(self) -> None:
+        findings = [
+            Finding("Nombre", "Ana Pérez", "info"),
+            Finding("Nombre del país", "España", "info"),
+            Finding("Dirección", "8.8.8.8", "info"),
+        ]
+        findings.extend(
+            Finding(
+                "Perfil",
+                f"perfil {index}",
+                "good",
+                url=f"https://example.com/perfil/{index}",
+                data={"direct_profile": True},
+            )
+            for index in range(15)
+        )
+        findings.append(
+            Finding(
+                "Foro",
+                "mención pública",
+                "link",
+                url="https://foro.example/hilo/1",
+            )
+        )
+        findings.append(
+            Finding(
+                "Directorio",
+                "consulta manual",
+                "link",
+                url="https://directorio.example/buscar?q=+34600123456",
+                data={"source_directory": True},
+            )
+        )
+        findings.append(
+            Finding(
+                "WhatsApp · contacto directo",
+                "contacto sin verificar",
+                "link",
+                url="https://wa.me/34600123456",
+                data={"contact_link": True},
+            )
+        )
+        findings.append(
+            Finding(
+                "Búsqueda manual",
+                "DuckDuckGo",
+                "link",
+                url="https://duckduckgo.com/?q=%2B34600123456",
+            )
+        )
+        scan = make_scan(*findings, target="+34 600 123 456", kind="phone")
+
+        final = final_findings(scan)
+        page_urls = [item.url for item in final if item.url]
+        self.assertEqual(len(page_urls), 16)
+        self.assertIn("https://example.com/perfil/14", page_urls)
+        self.assertIn("https://foro.example/hilo/1", page_urls)
+        self.assertNotIn("https://directorio.example/buscar?q=+34600123456", page_urls)
+        self.assertNotIn("https://wa.me/34600123456", page_urls)
+        self.assertNotIn("https://duckduckgo.com/?q=%2B34600123456", page_urls)
+
+        header = by_title(scan, "Páginas y perfiles encontrados")
+        self.assertEqual(header.data["pages"], 16)
+        self.assertIn("16 únicos", header.value)
+        self.assertIn("Ana Pérez", by_title(scan, "Nombre encontrado").value)
+        self.assertNotIn("España", by_title(scan, "Nombre encontrado").value)
+        self.assertEqual(by_title(scan, "IP encontrada").value, "8.8.8.8")
+        self.assertNotIn("Enlaces destacados", titles(scan))
+
+    def test_email_summary_lists_all_mass_profiles_in_every_format(self) -> None:
+        findings = [
+            Finding("Email", "analista@gmail.com", "info"),
+            Finding("Nombre", "Ana Pérez", "info"),
+            Finding("Dirección", "2001:4860:4860::8888", "info"),
+        ]
+        findings.extend(
+            Finding(
+                "Sitio",
+                f"perfil {index}",
+                "good",
+                url=f"https://sitio{index}.example/analista",
+                data={"direct_profile": True, "database": "Maigret"},
+            )
+            for index in range(12)
+        )
+        scan = make_scan(*findings, target="analista@gmail.com", kind="email")
+
+        final = final_findings(scan)
+        page_urls = [item.url for item in final if item.url]
+        self.assertEqual(len(page_urls), 12)
+        self.assertIn("https://sitio11.example/analista", page_urls)
+        self.assertIn("Ana Pérez", by_title(scan, "Nombre encontrado").value)
+        self.assertEqual(by_title(scan, "IP encontrada").value, "2001:4860:4860::8888")
+        self.assertNotIn("Enlaces destacados", titles(scan))
+
+        payload = json.loads(render_json(scan))
+        json_urls = [
+            item.get("url")
+            for item in payload["final_summary"]
+            if item.get("url")
+        ]
+        self.assertEqual(len(json_urls), 12)
+        self.assertIn("https://sitio11.example/analista", json_urls)
+
+        for text in (
+            render_console(scan, color=False),
+            render_markdown(scan),
+            render_html(scan),
+        ):
+            self.assertIn("https://sitio11.example/analista", text)
+            self.assertIn("Páginas y perfiles encontrados", text)
 
     def test_vehicle_and_device_technical_details(self) -> None:
         scan = make_scan(

@@ -16,7 +16,7 @@ herramientas.
 - **Pasivo por defecto**: las herramientas activas solo se ejecutan si las
   seleccionas y confirmas autorización.
 - Informes en **JSON, Markdown y HTML**.
-- **Resumen final** con IPs, datos técnicos y enlaces destacados.
+- **Resumen final** con IPs, datos técnicos y todas las páginas de teléfonos y emails.
 - Claves API por entorno o archivo de configuración, nunca obligatorias.
 - Plugins en Python para ampliar catálogo y módulos.
 
@@ -116,36 +116,53 @@ WhatsApp (`wa.me`) como contacto, indicando que la cuenta no se puede verificar
 sin iniciar sesión. Los buscadores públicos pueden limitar las consultas, por
 lo que la ausencia de resultados no demuestra que la cuenta no exista.
 
-### Resumen final: IPs, datos técnicos y enlaces
+### Resumen final: IPs, identidad y páginas encontradas
 
-Todos los resultados, especialmente los de teléfono, número y Gmail/email,
-terminan con un bloque **RESUMEN FINAL** en la consola y la TUI, y con una
-sección equivalente en JSON, Markdown y HTML. El bloque responde a dos
-preguntas:
+Todos los resultados terminan con un bloque **RESUMEN FINAL** en la consola y
+la TUI, y con una sección equivalente en JSON, Markdown y HTML. Para teléfonos
+y emails, el bloque muestra:
 
-- **¿Apareció alguna dirección IP?** Se buscan IPv4 e IPv6 únicas en títulos,
-  valores, URLs y metadatos, y se indica su ámbito (pública, privada, loopback)
+- **Nombre encontrado** cuando una fuente estructurada devuelve un nombre
+  (por ejemplo, Gravatar, IPQualityScore, Numverify o Twilio). Se indica la
+  herramienta de origen y se advierte que un nombre puede pertenecer a otra
+  persona.
+- **IP encontrada** con todas las IPv4 e IPv6 únicas detectadas en títulos,
+  valores, URLs y metadatos. Se indica su ámbito (pública, privada, loopback)
   y las herramientas que las mencionan. Si no hay ninguna, se dice
   explícitamente `ninguna en los resultados`.
-- **¿Qué enlaces conviene abrir?** Se seleccionan hasta 10 enlaces priorizando
-  perfiles directos, URLs que no son páginas de búsqueda y hosts de alto valor
-  (GitHub, LinkedIn, X/Twitter, WhatsApp, Truecaller, Gravatar, etc.). Las
-  búsquedas manuales quedan al final y solo aparecen si aportan información.
+- **Páginas y perfiles encontrados** con **todas** las páginas directas y
+  menciones, sin el límite de 10 enlaces. Se excluyen las URLs de buscadores,
+  búsquedas manuales, directorios de consulta y enlaces de contacto sintéticos
+  (como `wa.me`), que siguen visibles en la sección de cada herramienta. Así el
+  resumen no presenta una fuente de consulta como si fuera un registro
+  confirmado.
 
-También se resumen datos técnicos como ASN, MX, proveedor, país, región,
-operador, tipo de línea o zona horaria. El bloque se genera al renderizar el
-informe, por lo que no altera el conteo de herramientas ni de hallazgos.
+Para el resto de tipos de objetivo se conserva el resumen compacto: hasta 10
+enlaces priorizando perfiles directos, URLs que no son páginas de búsqueda y
+hosts de alto valor (GitHub, LinkedIn, X/Twitter, WhatsApp, Truecaller,
+Gravatar, etc.). También se resumen datos técnicos como ASN, MX, proveedor,
+país, región, operador, tipo de línea o zona horaria. El bloque se genera al
+renderizar el informe, por lo que no altera el conteo de herramientas ni de
+hallazgos.
 
 ```text
 RESUMEN FINAL
-   · Direcciones IP encontradas: ninguna en los resultados
+   · Datos del teléfono: nombre, IP y todas las páginas encontradas
+   ✓ Nombre encontrado: Ana Pérez · IPQualityScore
+   ✓ IP encontrada: 8.8.8.8
+   · Direcciones IP encontradas: 1 única en los resultados
    · Otros datos técnicos: 2 detectados; se muestran los más relevantes
-   · MX: 5 gmail-smtp-in.l.google.com.
-   · Proveedor: Google Workspace / Gmail
-   · Enlaces destacados: 3 de 12 enlaces; ordenados por perfil directo y relevancia
-   ✓ WhatsApp — perfil directo · Directorios y buscadores de teléfono
-     https://wa.me/34600123456
+   · Páginas y perfiles encontrados: 3 únicos; se listan todos
+   ! Aviso: el número puede aparecer en avisos o perfiles de otras personas.
+   ✓ GitHub — perfil directo · Perfiles de teléfono
+     https://github.com/ejemplo
+   ✓ Facebook — página o mención · Perfiles de teléfono
+     https://www.facebook.com/ejemplo/posts/123
 ```
+
+> Los perfiles de `email_mass` se basan en la parte local del email y pueden
+> coincidir con otras personas. El resumen los lista todos como páginas
+> posibles, no como cuentas verificadas del titular.
 
 ### Búsqueda masiva de usuarios y emails
 
@@ -195,6 +212,12 @@ licencia. Un escaneo de 2.000+ sitios tarda varios minutos y algunos servicios
 pueden responder con login, captcha o límites; esos casos se muestran como
 `Sin verificar`, no como cuentas inexistentes.
 
+`email_dork` complementa esa base con búsquedas pasivas más amplias: perfiles
+sociales y profesionales, GitHub, GitLab, Keybase, Gravatar, pastebins,
+documentos públicos (PDF, DOC, XLSX, CSV, TXT), páginas de filtraciones y una
+consulta general del email. Recoge hasta 60 resultados directos y el resumen
+final los lista todos.
+
 ### Teléfonos: 70 fuentes
 
 `phone_sources` genera enlaces a 70 directorios, buscadores inversos, bases de
@@ -202,6 +225,12 @@ reputación y contactos directos (WhatsApp, Telegram, Signal, Epieos). Los
 directorios regionales están etiquetados por país. Además de `phone_dork`,
 están disponibles `phone_veriphone`, `phone_abstract` y `phone_twilio` para
 quien tenga clave API.
+
+`phone_dork` busca el número en todos sus formatos razonables (texto original,
+E.164, solo dígitos y formato nacional cuando hay prefijo internacional) y
+amplía la cobertura a redes sociales, directorios inversos, foros de llamadas,
+pastebins y una búsqueda general. Recoge hasta 50 resultados directos; el
+resumen final muestra todas las páginas y menciones encontradas.
 
 ```sh
 osintkit scan "+34 600 123 456" -k phone
