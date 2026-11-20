@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "osintkit"
-version = "1.5.1"
+version = "1.5.2"
 description = "Kit de OSINT para terminal: DNS, web, IP, email, usuarios, teléfono, dispositivos, vehículos, cripto, organizaciones, amenazas, búsqueda y archivos."
 readme = "README.md"
 requires-python = ">=3.10"

@@ -126,6 +126,14 @@ y emails, el bloque muestra:
   (por ejemplo, Gravatar, IPQualityScore, Numverify o Twilio). Se indica la
   herramienta de origen y se advierte que un nombre puede pertenecer a otra
   persona.
+- **Ciudad del número** para teléfonos: se infiere del código de área con la
+  base interna (por ejemplo, `3544` → Villa Dolores, Córdoba) o, si está
+  instalado `phonenumbers`, de su geocodificador. Es una inferencia orientativa,
+  no una confirmación del titular.
+- **Fuentes con registro confirmado** para teléfonos: proveedores que devuelven
+  el número como válido o activo (Numverify, Veriphone, Abstract Phone, Twilio
+  o IPQualityScore, según las claves configuradas). No significa que exista una
+  cuenta en cada red social.
 - **IP encontrada** con todas las IPv4 e IPv6 únicas detectadas en títulos,
   valores, URLs y metadatos. Se indica su ámbito (pública, privada, loopback)
   y las herramientas que las mencionan. Si no hay ninguna, se dice
@@ -152,11 +160,14 @@ hallazgos.
 RESUMEN FINAL
    · Datos del teléfono: nombre, IP y todas las páginas encontradas
    ✓ Nombre encontrado: Ana Pérez · IPQualityScore
+   ✓ Ciudad del número: Villa Dolores · Córdoba · código 3544
    ✓ IP encontrada: 8.8.8.8
    · Direcciones IP encontradas: 1 única en los resultados
    · Otros datos técnicos: 2 detectados; se muestran los más relevantes
+   ✓ Fuentes con registro confirmado: Numverify, Twilio Lookup
    · Páginas y perfiles encontrados: 3 únicos; se listan todos
-   ! Aviso: el número puede aparecer en avisos o perfiles de otras personas.
+   ! Aviso: la ciudad se infiere del código de área; 'registro confirmado'
+     significa que un proveedor devolvió el número como válido o activo.
    ✓ GitHub — perfil directo · Perfiles de teléfono
      https://github.com/ejemplo
    ✓ Facebook — página o mención · Perfiles de teléfono
@@ -240,7 +251,20 @@ amplía la cobertura a redes sociales, directorios inversos, foros de llamadas,
 pastebins y una búsqueda general. Recoge hasta 50 resultados directos; el
 resumen final muestra todas las páginas y menciones encontradas.
 
+`phone_info` añade la **ciudad inferida por código de área** con una base
+interna de códigos argentinos (cobertura parcial, actualizable en
+`osintkit/data/phone_area_codes.json`). Para `+54 9 3544 123456` o
+`3544-123456` informa `Villa Dolores · Córdoba · código 3544`. Si la librería
+opcional `phonenumbers` está instalada, su geocodificador tiene prioridad.
+
+Las APIs con clave que devuelven `valid` o `active` marcan una fuente como
+**registro confirmado**; el resumen final enumera esos proveedores por nombre.
+Esto acredita que el número existe o está activo según ese servicio, no que el
+titular tenga una cuenta en una red social. Si no hay claves configuradas, el
+resumen lo indica explícitamente.
+
 ```sh
+osintkit scan "+54 3544 123456" -k phone
 osintkit scan "+34 600 123 456" -k phone
 osintkit run phone_sources "+34 600 123 456"
 osintkit run phone_dork "+34 600 123 456"
@@ -370,7 +394,7 @@ Perfiles disponibles:
 | `username` | alias | perfiles populares + 2.617 sitios de la base interna |
 | `username-quick` | alias | solo perfiles populares (sin base masiva) |
 | `username-deep` | alias | 2.000+ sitios + sherlock, maigret, social-analyzer |
-| `phone` | teléfono | país, formato, operador, perfiles y 70 directorios |
+| `phone` | teléfono | país, ciudad por área, operador, perfiles y 70 directorios |
 | `phone-deep` | teléfono | + phoneinfoga, APIs y buscadores de identificación |
 | `device` | dispositivo / SO | ciclo de vida, CVEs, avisos, firmware y exploits |
 | `device-deep` | dispositivo / SO | + SearchSploit local (sin técnicas de red activas) |

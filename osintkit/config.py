@@ -10,7 +10,7 @@ from typing import Any
 from .util import atomic_write, ensure_dir, mask_secret
 
 APP_NAME = "osintkit"
-VERSION = "1.5.1"
+VERSION = "1.5.2"
 CONFIG_VERSION = 1
 
 DEFAULT_SETTINGS: dict[str, Any] = {

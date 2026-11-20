@@ -285,6 +285,7 @@ def _ip_sort_key(item: tuple[str, dict[str, Any]]) -> tuple[int, int, int]:
 def _technical_details(scan: ScanResult) -> list[tuple[str, str]]:
     details: list[tuple[str, str]] = []
     seen: set[tuple[str, str]] = set()
+    skip_city = scan.kind == "phone" and _phone_location(scan) is not None
     for result in scan.results:
         for finding in result.findings:
             title = finding.title.strip()
@@ -292,6 +293,8 @@ def _technical_details(scan: ScanResult) -> list[tuple[str, str]]:
             if not title or not value:
                 continue
             lowered = title.casefold()
+            if skip_city and lowered == "ciudad":
+                continue
             if not any(marker in lowered for marker in _TECH_TITLES):
                 continue
             key = (title, value)
@@ -338,6 +341,7 @@ def _link_entries(scan: ScanResult) -> list[dict[str, Any]]:
             contact_link = bool(finding.data.get("contact_link"))
             alias_profile = bool(finding.data.get("alias_profile"))
             email_page = bool(finding.data.get("email_page"))
+            registration_confirmed = bool(finding.data.get("registration_confirmed"))
             score = 0
             if direct:
                 score += 100
@@ -350,6 +354,8 @@ def _link_entries(scan: ScanResult) -> list[dict[str, Any]]:
                 score += 15
             elif finding.level == "link":
                 score += 5
+            if registration_confirmed:
+                score += 20
             if manual:
                 score -= 15
             if alias_profile:
@@ -374,6 +380,7 @@ def _link_entries(scan: ScanResult) -> list[dict[str, Any]]:
                     "contact_link": contact_link,
                     "alias_profile": alias_profile,
                     "email_page": email_page,
+                    "registration_confirmed": registration_confirmed,
                     "score": score,
                     "order": len(entries),
                 }
@@ -405,6 +412,8 @@ def _link_finding(entry: Mapping[str, Any]) -> Finding:
         title = label or str(entry["tool"])
     if entry["alias_profile"]:
         reason = "coincidencia por alias, no verifica el email"
+    elif entry.get("registration_confirmed"):
+        reason = "registro confirmado"
     elif entry["direct"]:
         reason = (
             "perfil con el email"
@@ -431,6 +440,8 @@ def _link_finding(entry: Mapping[str, Any]) -> Finding:
         value += f" — {truncate(detail, 180)}"
     if entry["alias_profile"]:
         level = "warn"
+    elif entry.get("registration_confirmed"):
+        level = "good"
     else:
         level = "good" if entry["direct"] else "link"
     return Finding(
@@ -445,6 +456,7 @@ def _link_finding(entry: Mapping[str, Any]) -> Finding:
             "source_directory": entry["source_directory"],
             "alias_profile": entry["alias_profile"],
             "email_page": entry.get("email_page", False),
+            "registration_confirmed": entry.get("registration_confirmed", False),
             "score": entry["score"],
         },
     )
@@ -547,6 +559,32 @@ def _target_names(scan: ScanResult) -> list[tuple[str, str]]:
     return list(found.values())
 
 
+def _phone_location(scan: ScanResult) -> Finding | None:
+    """Hallazgo de ciudad del número; prioriza el inferido por código de área."""
+    candidates: list[Finding] = []
+    for result in scan.results:
+        for finding in result.findings:
+            if finding.title.casefold() == "ciudad":
+                candidates.append(finding)
+    for finding in candidates:
+        if finding.data.get("area_code"):
+            return finding
+    return candidates[0] if candidates else None
+
+
+def _confirmed_sources(scan: ScanResult) -> list[str]:
+    """Proveedores que marcaron explícitamente el número como válido/activo."""
+    sources: list[str] = []
+    for result in scan.results:
+        for finding in result.findings:
+            if not finding.data.get("registration_confirmed"):
+                continue
+            source = str(finding.data.get("provider") or result.name).strip()
+            if source and source not in sources:
+                sources.append(source)
+    return sources
+
+
 def _target_identity(
     scan: ScanResult,
     ips: list[tuple[str, dict[str, Any]]],
@@ -580,6 +618,30 @@ def _target_identity(
     else:
         findings.append(Finding("Nombre encontrado", "no se encontró en los resultados", "info"))
 
+    if scan.kind == "phone":
+        location = _phone_location(scan)
+        if location:
+            value = location.value
+            code = location.data.get("area_code")
+            if code:
+                value = f"{value} · código {code}"
+            findings.append(
+                Finding(
+                    "Ciudad del número",
+                    value,
+                    "good",
+                    data=dict(location.data),
+                )
+            )
+        else:
+            findings.append(
+                Finding(
+                    "Ciudad del número",
+                    "no se pudo inferir con los datos disponibles",
+                    "info",
+                )
+            )
+
     if ips:
         addresses = [address for address, _info in ips]
         title = "IP encontrada" if len(addresses) == 1 else "IPs encontradas"
@@ -599,11 +661,15 @@ def _target_identity(
 def _target_pages_findings(scan: ScanResult) -> list[Finding]:
     pages = _target_pages(scan)
     aliases = _alias_pages(scan)
+    confirmed = _confirmed_sources(scan)
     if scan.kind == "phone":
         warning = (
             "Las búsquedas manuales y los directorios quedan en cada herramienta. "
             "El número puede aparecer en avisos, páginas de terceros o perfiles de "
-            "otras personas; revisa cada enlace antes de atribuirlo al titular."
+            "otras personas; revisa cada enlace antes de atribuirlo al titular. "
+            "La ciudad se infiere del código de área y puede no ser exacta. "
+            "'Registro confirmado' significa que un proveedor devolvió el número "
+            "como válido o activo, no que exista una cuenta en cada red social."
         )
         header = (
             f"{len(pages)} {'único' if len(pages) == 1 else 'únicos'}; "
@@ -633,6 +699,19 @@ def _target_pages_findings(scan: ScanResult) -> list[Finding]:
         ),
         Finding("Aviso", warning, "warn"),
     ]
+    if scan.kind == "phone":
+        findings.append(
+            Finding(
+                "Fuentes con registro confirmado",
+                (
+                    ", ".join(confirmed)
+                    if confirmed
+                    else "ninguna fuente disponible confirmó el número"
+                ),
+                "good" if confirmed else "info",
+                data={"sources": confirmed, "kind": scan.kind},
+            )
+        )
     if scan.kind == "email" and aliases:
         findings.append(
             Finding(

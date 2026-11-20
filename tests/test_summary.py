@@ -145,11 +145,23 @@ class FinalSummaryTests(unittest.TestCase):
         self.assertTrue(any(item["title"].startswith("IP ") for item in payload["final_summary"]))
 
 
-    def test_phone_summary_lists_every_page_and_identity(self) -> None:
+    def test_phone_summary_lists_every_page_identity_city_and_confirmations(self) -> None:
         findings = [
             Finding("Nombre", "Ana Pérez", "info"),
             Finding("Nombre del país", "España", "info"),
             Finding("Dirección", "8.8.8.8", "info"),
+            Finding(
+                "Ciudad",
+                "Villa Dolores · Córdoba",
+                "good",
+                data={"area_code": "3544", "source": "phone_area_codes"},
+            ),
+            Finding(
+                "Numverify",
+                "confirmó que el número existe y está activo (valid)",
+                "good",
+                data={"registration_confirmed": True, "provider": "Numverify"},
+            ),
         ]
         findings.extend(
             Finding(
@@ -212,7 +224,22 @@ class FinalSummaryTests(unittest.TestCase):
         self.assertIn("Ana Pérez", by_title(scan, "Nombre encontrado").value)
         self.assertNotIn("España", by_title(scan, "Nombre encontrado").value)
         self.assertEqual(by_title(scan, "IP encontrada").value, "8.8.8.8")
+        self.assertIn("Villa Dolores", by_title(scan, "Ciudad del número").value)
+        self.assertIn("3544", by_title(scan, "Ciudad del número").value)
+        self.assertIn("Numverify", by_title(scan, "Fuentes con registro confirmado").value)
         self.assertNotIn("Enlaces destacados", titles(scan))
+
+        payload = json.loads(render_json(scan))
+        summary_titles = [item.get("title") for item in payload["final_summary"]]
+        self.assertIn("Ciudad del número", summary_titles)
+        self.assertIn("Fuentes con registro confirmado", summary_titles)
+        for text in (
+            render_console(scan, color=False),
+            render_markdown(scan),
+            render_html(scan),
+        ):
+            self.assertIn("Ciudad del número", text)
+            self.assertIn("Fuentes con registro confirmado", text)
 
     def test_email_summary_only_lists_exact_email_pages(self) -> None:
         findings = [

@@ -8,6 +8,7 @@ from typing import Any
 from urllib.parse import quote, quote_plus
 
 from ..core import Context, Finding, module, render_template
+from ..datasets import phone_area_codes as _phone_area_codes_data
 from ..datasets import phone_sources as _phone_source_data
 from ..http import HttpError, NetworkError
 from ..util import dedupe, phone_digits, truncate
@@ -86,6 +87,117 @@ def _split_country(number: str) -> tuple[str, str, str]:
     return "", "", digits
 
 
+def _is_true(value: Any) -> bool:
+    """Interpreta booleanos devueltos como true/1/sí por las APIs."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value == 1
+    return str(value).strip().casefold() in {"1", "true", "sí", "si", "yes"}
+
+
+def infer_area(number: str) -> dict[str, str] | None:
+    """Devuelve la zona de la base offline a partir del código de área.
+
+    Se prueban primero los códigos más largos para no confundir, por ejemplo,
+    ``3544`` (Villa Dolores) con un prefijo más corto. En números argentinos con
+    el ``9`` de móvil se elimina ese dígito antes de buscar el área.
+    """
+    digits = phone_digits(number)
+    if len(digits) < 6:
+        return None
+    international = number.strip().startswith(("+", "00"))
+    if international:
+        prefix, country, rest = _split_country(number)
+        national = rest or digits
+        if prefix == "54" and national.startswith("9") and len(national) > 1:
+            national = national[1:]
+        country_iso = {"Argentina": "AR"}.get(country, "")
+    else:
+        # Sin prefijo internacional se prioriza la base argentina: hay códigos
+        # de área (3544) que coinciden con prefijos de país (354, Islandia).
+        country_iso = "AR"
+        national = digits
+    if not country_iso:
+        return None
+    areas = [
+        area for area in _phone_area_codes_data()
+        if str(area.get("country", "")).upper() == country_iso
+    ]
+    for size in (5, 4, 3, 2):
+        code = national[:size]
+        for area in areas:
+            if str(area.get("code", "")) == code:
+                return {
+                    "country": country_iso,
+                    "code": code,
+                    "city": str(area.get("city") or ""),
+                    "province": str(area.get("province") or ""),
+                }
+    return None
+
+
+def _area_findings(number: str, geo_description: str = "") -> list[Finding]:
+    """Hallazgos de código de área y ciudad para el resumen final."""
+    findings: list[Finding] = []
+    area = infer_area(number)
+    if area:
+        findings.append(
+            f(
+                "Código de área",
+                f"+{area['country']} {area['code']}",
+                "info",
+                country=area["country"],
+                area_code=area["code"],
+                source="phone_area_codes",
+            )
+        )
+    if geo_description:
+        extra: dict[str, Any] = {"source": "phonenumbers", "geocoded": True}
+        if area:
+            extra["area_code"] = area["code"]
+            extra["country"] = area["country"]
+        findings.append(f("Ciudad", geo_description, "good", **extra))
+    elif area and area["city"]:
+        value = area["city"]
+        if area["province"]:
+            value = f"{value} · {area['province']}"
+        findings.append(
+            f(
+                "Ciudad",
+                value,
+                "good",
+                country=area["country"],
+                area_code=area["code"],
+                source="phone_area_codes",
+            )
+        )
+    return findings
+
+
+def _confirmation_finding(
+    provider: str,
+    data: dict[str, Any],
+    fields: tuple[str, ...] = ("valid", "phone_valid", "is_valid", "active"),
+) -> Finding | None:
+    """Marca una fuente que devolvió el número como válido o activo.
+
+    No implica que exista una cuenta en una red social: documenta que el
+    proveedor confirmó la existencia/actividad del número.
+    """
+    for field in fields:
+        if _is_true(data.get(field)):
+            return f(
+                provider,
+                f"confirmó que el número existe y está activo ({field})",
+                "good",
+                registration_confirmed=True,
+                provider=provider,
+                field=field,
+            )
+    return None
+
+
 def _phone_variants(number: str) -> list[str]:
     """Formatos habituales de un número para ampliar las búsquedas pasivas.
 
@@ -146,6 +258,14 @@ def phone_info(ctx: Context, tool: Any) -> list[Finding]:
             f("Tipo de línea", line_type or "—", "info"),
             f("Operador", carrier or "—", "info"),
         ]
+        geo_description = ""
+        try:
+            from phonenumbers import geocoder  # type: ignore
+
+            geo_description = geocoder.description_for_number(parsed, "es") or ""
+        except Exception:  # noqa: BLE001
+            pass
+        findings.extend(_area_findings(raw, geo_description))
         return findings
     except ImportError:
         findings.append(f("phonenumbers", "no instalado; se usa detección básica", "info"))
@@ -153,14 +273,22 @@ def phone_info(ctx: Context, tool: Any) -> list[Finding]:
         findings.append(f("phonenumbers", f"error: {exc}", "warn"))
 
     digits = phone_digits(raw)
-    prefix, country, rest = _split_country(raw)
+    area = infer_area(raw)
+    international = raw.startswith(("+", "00"))
+    if not international and area:
+        prefix, country, rest = "54", "Argentina", digits
+        e164_approx = f"+54{digits}"
+    else:
+        prefix, country, rest = _split_country(raw)
+        e164_approx = f"+{digits}"
     if prefix:
         findings.append(f("Código de país", f"+{prefix} · {country}", "info"))
         findings.append(f("Número nacional", rest, "info"))
-        findings.append(f("E.164 aproximado", f"+{digits}", "good"))
+        findings.append(f("E.164 aproximado", e164_approx, "good"))
     else:
         findings.append(f("Código de país", "no detectado", "warn"))
     findings.append(f("Dígitos", str(len(digits)), "info"))
+    findings.extend(_area_findings(raw))
     if raw.startswith("00"):
         findings.append(f("Formato", "prefijo internacional 00 detectado", "info"))
     if "@" in raw:
@@ -265,6 +393,9 @@ def phone_numverify(ctx: Context, tool: Any) -> list[Finding]:
     if isinstance(data, dict) and data.get("error"):
         return [f("Numverify", str(data.get("error")), "warn")]
     findings: list[Finding] = [f("Válido", str(data.get("valid")), "good" if data.get("valid") else "warn")]
+    confirmation = _confirmation_finding("Numverify", data, ("valid",))
+    if confirmation:
+        findings.append(confirmation)
     for key, label in (("number", "Número"), ("local_format", "Formato local"),
                        ("international_format", "E.164"), ("country_prefix", "Prefijo"),
                        ("country_code", "País"), ("country_name", "Nombre del país"),
@@ -307,6 +438,9 @@ def phone_ipqualityscore(ctx: Context, tool: Any) -> list[Finding]:
             continue
         level = "bad" if warn and value else "info"
         findings.append(f(f"{label}", str(value), level))
+    confirmation = _confirmation_finding("IPQualityScore", data, ("active",))
+    if confirmation:
+        findings.append(confirmation)
     return findings or [f("IPQualityScore", "sin datos", "info")]
 
 
@@ -372,6 +506,9 @@ def phone_veriphone(ctx: Context, tool: Any) -> list[Finding]:
     findings: list[Finding] = [
         f("Válido", str(data.get("phone_valid", data.get("valid", "—"))), "info")
     ]
+    confirmation = _confirmation_finding("Veriphone", data, ("phone_valid", "valid"))
+    if confirmation:
+        findings.append(confirmation)
     for key, label in (
         ("phone", "Número"),
         ("phone_type", "Tipo"),
@@ -415,6 +552,9 @@ def phone_abstract(ctx: Context, tool: Any) -> list[Finding]:
     findings: list[Finding] = [
         f("Válido", str(data.get("valid", "—")), "info")
     ]
+    confirmation = _confirmation_finding("Abstract Phone", data, ("valid",))
+    if confirmation:
+        findings.append(confirmation)
     country = data.get("country") if isinstance(data.get("country"), dict) else {}
     for key, label in (
         ("format", "Formato"),
@@ -472,6 +612,9 @@ def phone_twilio(ctx: Context, tool: Any) -> list[Finding]:
         if value not in (None, ""):
             level = "good" if key == "valid" and value else "info"
             findings.append(f(label, str(value), level))
+    confirmation = _confirmation_finding("Twilio Lookup", data, ("valid",))
+    if confirmation:
+        findings.append(confirmation)
     carrier = data.get("carrier")
     if isinstance(carrier, dict):
         for key, label in (("name", "Operador"), ("type", "Tipo de línea"), ("mobile_country_code", "MCC"), ("mobile_network_code", "MNC")):

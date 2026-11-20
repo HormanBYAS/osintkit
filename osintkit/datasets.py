@@ -14,7 +14,7 @@ from typing import Any
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
 
-@lru_cache(maxsize=8)
+@lru_cache(maxsize=12)
 def _load(name: str) -> Any:
     path = DATA_DIR / name
     try:
@@ -53,6 +53,22 @@ def phone_sources_meta() -> dict[str, Any]:
     if not isinstance(data, dict):
         return {}
     return {key: value for key, value in data.items() if key != "sources"}
+
+
+def phone_area_codes() -> list[dict[str, Any]]:
+    """Códigos de área con ciudad y provincia para inferencia offline."""
+    data = _load("phone_area_codes.json")
+    areas = data.get("areas") if isinstance(data, dict) else None
+    if not isinstance(areas, list):
+        return []
+    return [item for item in areas if isinstance(item, dict)]
+
+
+def phone_area_codes_meta() -> dict[str, Any]:
+    data = _load("phone_area_codes.json")
+    if not isinstance(data, dict):
+        return {}
+    return {key: value for key, value in data.items() if key != "areas"}
 
 
 def device_products() -> list[dict[str, Any]]:
