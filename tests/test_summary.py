@@ -214,7 +214,7 @@ class FinalSummaryTests(unittest.TestCase):
         self.assertEqual(by_title(scan, "IP encontrada").value, "8.8.8.8")
         self.assertNotIn("Enlaces destacados", titles(scan))
 
-    def test_email_summary_lists_all_mass_profiles_in_every_format(self) -> None:
+    def test_email_summary_only_lists_exact_email_pages(self) -> None:
         findings = [
             Finding("Email", "analista@gmail.com", "info"),
             Finding("Nombre", "Ana Pérez", "info"),
@@ -223,12 +223,26 @@ class FinalSummaryTests(unittest.TestCase):
         findings.extend(
             Finding(
                 "Sitio",
-                f"perfil {index}",
+                f"perfil exacto {index}",
                 "good",
                 url=f"https://sitio{index}.example/analista",
-                data={"direct_profile": True, "database": "Maigret"},
+                data={
+                    "direct_profile": True,
+                    "email_page": True,
+                    "email_exact": True,
+                },
             )
             for index in range(12)
+        )
+        findings.extend(
+            Finding(
+                "Sitio",
+                f"alias {index}",
+                "good",
+                url=f"https://alias{index}.example/analista",
+                data={"direct_profile": True, "alias_profile": True},
+            )
+            for index in range(8)
         )
         scan = make_scan(*findings, target="analista@gmail.com", kind="email")
 
@@ -236,8 +250,10 @@ class FinalSummaryTests(unittest.TestCase):
         page_urls = [item.url for item in final if item.url]
         self.assertEqual(len(page_urls), 12)
         self.assertIn("https://sitio11.example/analista", page_urls)
+        self.assertNotIn("https://alias0.example/analista", page_urls)
         self.assertIn("Ana Pérez", by_title(scan, "Nombre encontrado").value)
         self.assertEqual(by_title(scan, "IP encontrada").value, "2001:4860:4860::8888")
+        self.assertIn("8", by_title(scan, "Coincidencias por alias").value)
         self.assertNotIn("Enlaces destacados", titles(scan))
 
         payload = json.loads(render_json(scan))
@@ -248,6 +264,7 @@ class FinalSummaryTests(unittest.TestCase):
         ]
         self.assertEqual(len(json_urls), 12)
         self.assertIn("https://sitio11.example/analista", json_urls)
+        self.assertNotIn("https://alias0.example/analista", json_urls)
 
         for text in (
             render_console(scan, color=False),
@@ -256,6 +273,7 @@ class FinalSummaryTests(unittest.TestCase):
         ):
             self.assertIn("https://sitio11.example/analista", text)
             self.assertIn("Páginas y perfiles encontrados", text)
+            self.assertIn("Coincidencias por alias", text)
 
     def test_vehicle_and_device_technical_details(self) -> None:
         scan = make_scan(

@@ -133,9 +133,12 @@ y emails, el bloque muestra:
 - **Páginas y perfiles encontrados** con **todas** las páginas directas y
   menciones, sin el límite de 10 enlaces. Se excluyen las URLs de buscadores,
   búsquedas manuales, directorios de consulta y enlaces de contacto sintéticos
-  (como `wa.me`), que siguen visibles en la sección de cada herramienta. Así el
-  resumen no presenta una fuente de consulta como si fuera un registro
-  confirmado.
+  (como `wa.me`), que siguen visibles en la sección de cada herramienta.
+  En emails solo se listan páginas donde aparece el **email exacto** o un
+  perfil asociado de forma verificable (Gravatar, GitHub); una mención no se
+  presenta como una cuenta registrada. Las coincidencias de `email_mass` por la
+  parte local se resumen aparte como **coincidencias por alias** y no se listan
+  como páginas del email.
 
 Para el resto de tipos de objetivo se conserva el resumen compacto: hasta 10
 enlaces priorizando perfiles directos, URLs que no son páginas de búsqueda y
@@ -161,8 +164,9 @@ RESUMEN FINAL
 ```
 
 > Los perfiles de `email_mass` se basan en la parte local del email y pueden
-> coincidir con otras personas. El resumen los lista todos como páginas
-> posibles, no como cuentas verificadas del titular.
+> coincidir con otras personas. Por eso no se listan como páginas del email en
+> el resumen: solo se informa cuántas coincidencias por alias se encontraron.
+> No son cuentas verificadas del titular.
 
 ### Búsqueda masiva de usuarios y emails
 
@@ -176,17 +180,21 @@ omite la base masiva y `username-deep` añade enumeradores externos opcionales.
 base busca nombres de usuario, se utiliza la **parte local** de la dirección:
 `analista@gmail.com` se comprueba como `analista`. En Gmail y Googlemail se
 elimina el sufijo `+etiqueta` (`analista+osint@gmail.com` también se busca como
-`analista`). Los perfiles `email` y `email-deep` la ejecutan por defecto;
-`email-quick` omite la base masiva.
+`analista`). El perfil `email-deep` la ejecuta por defecto; `email` y
+`email-quick` la omiten para que un escaneo normal de Gmail no confunda alias
+con registros del email.
 
 ```sh
 # Perfil normal: perfiles populares + base masiva completa
 osintkit scan analista -k username
 osintkit scan analista@gmail.com
 
-# Solo la comprobación rápida
-osintkit scan analista -k username -p username-quick
+# Email exacto y rápido, sin base masiva
+osintkit scan analista@gmail.com -p email
 osintkit scan analista@gmail.com -p email-quick
+
+# Email profundo: email exacto + 2.617 sitios por alias + externos
+osintkit scan analista@gmail.com -p email-deep
 
 # Herramientas masivas sueltas
 osintkit run username_mass analista
@@ -356,9 +364,9 @@ Perfiles disponibles:
 | `domain-deep` | dominio | + subfinder, amass, httpx, nuclei, ffuf… (activo) |
 | `ip` | IP | geolocalización, ASN, RDAP, reputación, DNSBL |
 | `ip-deep` | IP | + nmap, masscan, traceroute (activo) |
-| `email` | email | validación, Gravatar, PGP, brechas, perfiles y 2.617 sitios |
-| `email-quick` | email | solo validación y perfiles directos (sin base masiva) |
-| `email-deep` | email | 2.617 sitios + holehe, h8mail, ghunt (activo) |
+| `email` | email | validación, Gravatar, PGP, brechas y menciones exactas |
+| `email-quick` | email | validación y servicios directos (sin búsqueda web) |
+| `email-deep` | email | email exacto + 2.617 sitios por alias + holehe, h8mail, ghunt |
 | `username` | alias | perfiles populares + 2.617 sitios de la base interna |
 | `username-quick` | alias | solo perfiles populares (sin base masiva) |
 | `username-deep` | alias | 2.000+ sitios + sherlock, maigret, social-analyzer |

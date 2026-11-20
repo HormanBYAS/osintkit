@@ -196,6 +196,7 @@ def _mass_scan(
     timeout_setting: str,
     found_label: str,
     warning: str = "",
+    alias_profile: bool = False,
 ) -> list[Finding]:
     """Ejecuta la base de sitios para un alias y devuelve hallazgos comunes."""
     query = query.strip()
@@ -316,6 +317,7 @@ def _mass_scan(
                 license="MIT",
                 query=query,
                 direct_profile=True,
+                alias_profile=alias_profile,
             )
         )
     if not found:

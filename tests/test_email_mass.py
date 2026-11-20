@@ -42,8 +42,9 @@ class EmailMassTests(unittest.TestCase):
         args, kwargs = scan.call_args
         self.assertEqual(args[2], "analista")
         self.assertEqual(kwargs["target_value"], "analista+osint@gmail.com")
-        self.assertIn("no demuestra", kwargs["warning"])
-        self.assertEqual(kwargs["found_label"], "Perfiles posibles")
+        self.assertIn("no demuestran", kwargs["warning"])
+        self.assertEqual(kwargs["found_label"], "Coincidencias por alias")
+        self.assertTrue(kwargs["alias_profile"])
 
     def test_invalid_email_does_not_scan(self) -> None:
         class Ctx:

@@ -80,6 +80,8 @@ class EmailPhoneDirectLinkTests(unittest.TestCase):
         self.assertEqual(findings[0].title, "Perfiles directos")
         self.assertEqual(findings[1].url, "https://github.com/foo")
         self.assertEqual(findings[1].level, "good")
+        self.assertTrue(findings[1].data.get("email_page"))
+        self.assertTrue(findings[1].data.get("email_exact"))
 
     def test_email_fallback_is_labeled(self) -> None:
         ctx = mock.Mock(target="foo@example.com", kind="email")
@@ -103,6 +105,7 @@ class EmailPhoneDirectLinkTests(unittest.TestCase):
         ctx.http.get.side_effect = [users, commits]
         findings = email_module._github_email_profiles(ctx, "foo@example.com")
         self.assertEqual([item.url for item in findings], ["https://github.com/foo", "https://github.com/bar"])
+        self.assertTrue(all(item.data.get("email_exact") for item in findings))
 
     def test_phone_returns_direct_profile(self) -> None:
         hit = SearchHit("Perfil", "https://wa.me/34600123456", "34600123456", "DuckDuckGo")

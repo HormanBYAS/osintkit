@@ -77,7 +77,8 @@ def email_gravatar(ctx: Context, tool: Any) -> list[Finding]:
     if response and response.status == 200:
         findings.append(
             f("Gravatar", "existe un avatar público para este email", "warn",
-              url=f"https://gravatar.com/{digest}", data={"hash": digest})
+              url=f"https://gravatar.com/{digest}", hash=digest,
+              email_page=True, email_exact=True)
         )
         profile = safe_get(ctx, f"https://www.gravatar.com/{digest}.json", timeout=20)
         if profile and profile.ok:
@@ -88,14 +89,27 @@ def email_gravatar(ctx: Context, tool: Any) -> list[Finding]:
                     for key, label in (("displayName", "Nombre"), ("aboutMe", "Bio"), ("currentLocation", "Ubicación"),
                                        ("profileUrl", "Perfil"), ("preferredUsername", "Usuario")):
                         if entry.get(key):
-                            findings.append(f(f"{label}", str(entry[key]), "info",
-                                            url=str(entry[key]) if key == "profileUrl" else ""))
+                            url = str(entry[key]) if key == "profileUrl" else ""
+                            findings.append(
+                                f(
+                                    f"{label}",
+                                    str(entry[key]),
+                                    "info",
+                                    url=url,
+                                    direct_profile=key == "profileUrl",
+                                    email_page=bool(url),
+                                    email_exact=bool(url),
+                                )
+                            )
                     for account in (entry.get("accounts") or [])[:20]:
                         if isinstance(account, dict):
                             findings.append(
                                 f("Cuenta vinculada", f"{account.get('shortname')}: {account.get('url')}", "link",
-                                url=str(account.get("url", ""))
-                            ))
+                                url=str(account.get("url", "")),
+                                direct_profile=True,
+                                email_page=True,
+                                email_exact=True)
+                            )
             except ValueError:
                 pass
     elif response and response.status == 404:
@@ -317,7 +331,11 @@ def _github_email_profiles(ctx: Context, email: str) -> list[Finding]:
                     f"{detail} · {label}" if label else detail,
                     "good",
                     url=profile_url,
-                    data={"source": "api.github.com", "query": params.get("q")},
+                    source="api.github.com",
+                    query=params.get("q"),
+                    direct_profile=True,
+                    email_page=True,
+                    email_exact=True,
                 )
             )
     return findings
@@ -361,7 +379,11 @@ def email_dork(ctx: Context, tool: Any) -> list[Finding]:
                 truncate(hit.snippet or hit.url, 240),
                 "good" if direct else "link",
                 url=hit.url,
-                data={"engine": hit.engine, "query": hit.query, "direct_profile": direct},
+                engine=hit.engine,
+                query=hit.query,
+                direct_profile=direct,
+                email_page=True,
+                email_exact=True,
             )
         )
     if findings:

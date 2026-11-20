@@ -42,8 +42,9 @@ def email_mass(ctx: Context, tool: Any) -> list[Finding]:
 
     warning = (
         f"Se comprueba la parte local '{alias}' en sitios de usuario. "
-        "Puede coincidir con otras personas y no demuestra que esos perfiles "
-        "pertenezcan al titular del email."
+        "No se verifica el email completo: son coincidencias por alias, pueden "
+        "pertenecer a otras personas y no demuestran que esas cuentas usen esta "
+        "dirección."
     )
     return _mass_scan(
         ctx,
@@ -54,6 +55,7 @@ def email_mass(ctx: Context, tool: Any) -> list[Finding]:
         limit_setting="email_mass_limit",
         workers_setting="email_mass_workers",
         timeout_setting="email_mass_timeout",
-        found_label="Perfiles posibles",
+        found_label="Coincidencias por alias",
         warning=warning,
+        alias_profile=True,
     )

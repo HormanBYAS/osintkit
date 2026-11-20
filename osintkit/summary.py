@@ -336,6 +336,8 @@ def _link_entries(scan: ScanResult) -> list[dict[str, Any]]:
             manual = finding.title.casefold() in {"búsqueda manual", "busqueda manual"}
             source_directory = bool(finding.data.get("source_directory"))
             contact_link = bool(finding.data.get("contact_link"))
+            alias_profile = bool(finding.data.get("alias_profile"))
+            email_page = bool(finding.data.get("email_page"))
             score = 0
             if direct:
                 score += 100
@@ -350,6 +352,10 @@ def _link_entries(scan: ScanResult) -> list[dict[str, Any]]:
                 score += 5
             if manual:
                 score -= 15
+            if alias_profile:
+                # Una coincidencia por alias nunca debe desplazar a una página
+                # donde aparece el email exacto.
+                score -= 60
             entries.append(
                 {
                     "url": url,
@@ -360,11 +366,14 @@ def _link_entries(scan: ScanResult) -> list[dict[str, Any]]:
                     "tool": result.name,
                     "tool_id": result.tool_id,
                     "category": result.category,
+                    "kind": scan.kind,
                     "direct": direct,
                     "search": search,
                     "manual": manual,
                     "source_directory": source_directory,
                     "contact_link": contact_link,
+                    "alias_profile": alias_profile,
+                    "email_page": email_page,
                     "score": score,
                     "order": len(entries),
                 }
@@ -394,14 +403,22 @@ def _link_finding(entry: Mapping[str, Any]) -> Finding:
         title = f"{label} · {title}" if title else label
     if not title:
         title = label or str(entry["tool"])
-    if entry["direct"]:
-        reason = "perfil directo"
+    if entry["alias_profile"]:
+        reason = "coincidencia por alias, no verifica el email"
+    elif entry["direct"]:
+        reason = (
+            "perfil con el email"
+            if entry.get("kind") == "email"
+            else "perfil directo"
+        )
     elif entry["contact_link"]:
         reason = "contacto directo"
     elif entry["source_directory"]:
         reason = "fuente o directorio"
     elif entry["search"]:
         reason = "búsqueda"
+    elif entry.get("email_page"):
+        reason = "mención del email"
     else:
         reason = "página o mención"
     value = " · ".join((reason, str(entry["tool"])))
@@ -412,16 +429,22 @@ def _link_finding(entry: Mapping[str, Any]) -> Finding:
         and detail.casefold() not in {"perfil directo", "búsqueda", "resultado", "ver"}
     ):
         value += f" — {truncate(detail, 180)}"
+    if entry["alias_profile"]:
+        level = "warn"
+    else:
+        level = "good" if entry["direct"] else "link"
     return Finding(
         title=title,
         value=value,
-        level="good" if entry["direct"] else "link",
+        level=level,
         url=str(entry["url"]),
         data={
             "tool": entry["tool_id"],
             "direct_profile": entry["direct"],
             "search_page": entry["search"],
             "source_directory": entry["source_directory"],
+            "alias_profile": entry["alias_profile"],
+            "email_page": entry.get("email_page", False),
             "score": entry["score"],
         },
     )
@@ -432,17 +455,42 @@ def _notable_links(scan: ScanResult, limit: int = MAX_LINKS) -> tuple[list[Findi
     return [_link_finding(entry) for entry in ranked[:limit]], len(ranked)
 
 
+def _summary_page(entry: Mapping[str, Any], kind: str) -> bool:
+    if (
+        entry["search"]
+        or entry["manual"]
+        or entry["source_directory"]
+        or entry["contact_link"]
+    ):
+        return False
+    if kind == "email":
+        return bool(entry.get("email_page")) and not entry["alias_profile"]
+    return True
+
+
 def _target_pages(scan: ScanResult) -> list[dict[str, Any]]:
     """Todas las páginas del objetivo, sin el límite de enlaces destacados.
 
-    Se excluyen buscadores, búsquedas manuales y directorios de consulta: esos
-    enlaces no demuestran que el teléfono o el email figuren en la página. El
-    resto se conserva completo para que el informe final no oculte coincidencias.
+    En email solo se incluyen páginas donde aparece el email exacto o un perfil
+    asociado de forma verificable (Gravatar/GitHub). Las coincidencias por alias
+    se devuelven aparte y nunca se presentan como registros del email.
     """
     return [
         entry
         for entry in _ranked_entries(scan)
-        if not entry["search"]
+        if _summary_page(entry, scan.kind)
+    ]
+
+
+def _alias_pages(scan: ScanResult) -> list[dict[str, Any]]:
+    """Perfiles encontrados por la parte local, no verificados por email."""
+    if scan.kind != "email":
+        return []
+    return [
+        entry
+        for entry in _ranked_entries(scan)
+        if entry["alias_profile"]
+        and not entry["search"]
         and not entry["manual"]
         and not entry["source_directory"]
         and not entry["contact_link"]
@@ -509,7 +557,11 @@ def _target_identity(
     findings: list[Finding] = [
         Finding(
             f"Datos del {label}",
-            "nombre, IP y todas las páginas encontradas",
+            (
+                "nombre, IP y todas las páginas encontradas"
+                if scan.kind == "phone"
+                else "nombre, IP y páginas con el email exacto"
+            ),
             "info",
         )
     ]
@@ -546,33 +598,53 @@ def _target_identity(
 
 def _target_pages_findings(scan: ScanResult) -> list[Finding]:
     pages = _target_pages(scan)
+    aliases = _alias_pages(scan)
     if scan.kind == "phone":
         warning = (
             "Las búsquedas manuales y los directorios quedan en cada herramienta. "
             "El número puede aparecer en avisos, páginas de terceros o perfiles de "
             "otras personas; revisa cada enlace antes de atribuirlo al titular."
         )
+        header = (
+            f"{len(pages)} {'único' if len(pages) == 1 else 'únicos'}; "
+            "se listan todos"
+            if pages
+            else "no se encontraron páginas directas en los resultados"
+        )
     else:
         warning = (
-            "Las búsquedas manuales y los directorios quedan en cada herramienta. "
-            "Los perfiles de la búsqueda masiva coinciden con la parte local del "
-            "email y pueden pertenecer a otras personas; no demuestran por sí solos "
-            "que la cuenta esté registrada."
+            "Solo se listan páginas donde aparece el email exacto o un perfil "
+            "asociado de forma verificable. Una mención no demuestra que la "
+            "cuenta esté registrada. Las coincidencias por alias quedan en "
+            "email_mass y no se cuentan como páginas del email."
+        )
+        header = (
+            f"{len(pages)} {'único' if len(pages) == 1 else 'únicos'}; "
+            "solo evidencia exacta del email"
+            if pages
+            else "no se encontraron páginas con el email exacto"
         )
     findings: list[Finding] = [
         Finding(
             "Páginas y perfiles encontrados",
-            (
-                f"{len(pages)} {'único' if len(pages) == 1 else 'únicos'}; "
-                "se listan todos"
-                if pages
-                else "no se encontraron páginas directas en los resultados"
-            ),
+            header,
             "info" if pages else "warn",
             data={"pages": len(pages), "kind": scan.kind},
         ),
         Finding("Aviso", warning, "warn"),
     ]
+    if scan.kind == "email" and aliases:
+        findings.append(
+            Finding(
+                "Coincidencias por alias",
+                (
+                    f"{len(aliases)} perfiles por la parte local; no verifican el "
+                    "email y no se listan aquí. Revisa email_mass si quieres verlos."
+                ),
+                "warn",
+                data={"aliases": len(aliases)},
+            )
+        )
     findings.extend(_link_finding(entry) for entry in pages)
     return findings
 

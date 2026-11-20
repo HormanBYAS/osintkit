@@ -2718,27 +2718,29 @@ PROFILES: dict[str, dict[str, object]] = {
     "email": {
         "name": "Email · pasivo",
         "kinds": ("email",),
-        "description": "Validación, perfiles, brechas y 2.617 sitios para la parte local.",
-        "tools": [
-            "email_validate", "email_gravatar", "email_pgp", "email_hibp",
-            "email_hunter", "emailrep", "email_dork", "email_mass",
-        ],
-    },
-    "email-quick": {
-        "name": "Email · rápido",
-        "kinds": ("email",),
-        "description": "Solo validación y perfiles directos; no ejecuta la base masiva.",
+        "description": "Validación, perfiles exactos, brechas y menciones del email.",
         "tools": [
             "email_validate", "email_gravatar", "email_pgp", "email_hibp",
             "email_hunter", "emailrep", "email_dork",
         ],
     },
+    "email-quick": {
+        "name": "Email · rápido",
+        "kinds": ("email",),
+        "description": "Validación y servicios directos; sin búsqueda web ni base masiva.",
+        "tools": [
+            "email_validate", "email_gravatar", "email_pgp", "email_hibp",
+            "email_hunter", "emailrep",
+        ],
+    },
     "email-deep": {
         "name": "Email · profundo",
         "kinds": ("email",),
-        "description": "2.617 sitios y herramientas externas de registro y filtraciones.",
+        "description": "Todo lo pasivo, 2.617 sitios por alias y herramientas externas.",
         "tools": [
-            "email_mass", "holehe", "ghunt", "h8mail", "mosint", "blackbird",
+            "email_validate", "email_gravatar", "email_pgp", "email_hibp",
+            "email_hunter", "emailrep", "email_dork", "email_mass",
+            "holehe", "ghunt", "h8mail", "mosint", "blackbird",
             "pwnedornot", "infoga",
         ],
     },
